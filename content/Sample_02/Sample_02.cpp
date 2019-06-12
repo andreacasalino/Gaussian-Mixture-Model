@@ -7,7 +7,7 @@
 int main() {
 
 	srand((unsigned int)time(0));
-	size_t N_cluster = 8;
+	size_t N_cluster = 6;
 
 //build a random GMM
 	Gaussian_Mixture_Model GMM_rand(N_cluster, 2);

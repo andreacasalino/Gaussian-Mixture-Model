@@ -46,17 +46,24 @@ void Gaussian_Mixture_Model::Train_set::__import_samples(const std::list<Eigen::
 	if (s.empty()) abort();
 	auto it = s.begin();
 	size_t D = it->size();
-	this->Samples.push_back(*it);
+	this->Samples->push_back(*it);
 	it++;
 	for (it; it != s.end(); it++) {
 		if (it->size() != D) 
 			abort();		
-		this->Samples.push_back(*it);
+		this->Samples->push_back(*it);
 	}
 
 };
 
-Gaussian_Mixture_Model::Train_set::Train_set(const std::string& file_to_read) {
+Gaussian_Mixture_Model::Train_set::Train_set(const Train_set& to_clone) {
+
+	this->was_cloned = true;
+	this->Samples = to_clone.Samples;
+
+}
+
+Gaussian_Mixture_Model::Train_set::Train_set(const std::string& file_to_read) : Train_set() {
 
 	ifstream f(file_to_read);
 
@@ -79,6 +86,15 @@ Gaussian_Mixture_Model::Train_set::Train_set(const std::string& file_to_read) {
 
 }
 
+Gaussian_Mixture_Model::Train_set::Train_set(const std::list<Eigen::VectorXf>& samples) : Train_set() {
+
+	this->__import_samples(samples); 
+
+};
+
+struct Gaussian_Mixture_Model::Train_set::Sample_handler {
+	static list<VectorXf>* get_samples(Gaussian_Mixture_Model::Train_set& set) { return set.Samples; };
+};
 
 
 
@@ -206,19 +222,6 @@ void eval_Normal_Log_density(float* den, VectorXf& Mean, MatrixXf& invCov, float
 
 }
 
-Gaussian_Mixture_Model::Gaussian_Mixture_Model(const Gaussian_Mixture_Model& to_clone) {
-
-	for (auto it = to_clone.Clusters.begin(); it != to_clone.Clusters.end(); it++) {
-		this->Clusters.push_back(cluster());
-		this->Clusters.back().Mean			= it->Mean;
-		this->Clusters.back().Covariance	= it->Covariance;
-		this->Clusters.back().Inverse_Cov	= it->Inverse_Cov;
-		this->Clusters.back().Abs_Deter_Cov = it->Abs_Deter_Cov;
-		this->Clusters.back().weight		= it->weight;
-	}
-
-}
-
 void Gaussian_Mixture_Model::__eval_log_density(float* den, VectorXf& X) {
 
 	*den = 0.f;
@@ -325,26 +328,23 @@ void Gaussian_Mixture_Model::Get_samples(std::list<Eigen::VectorXf>* samples, co
 
 }
 
-void Gaussian_Mixture_Model::EM_train(Train_set&   train_set, const size_t& N_clusters, std::list<float>* likelihood_story) {
+void Gaussian_Mixture_Model::EM_train(const Train_set&   train_set, std::list<float>* likelihood_story) {
 
-	if (N_clusters == 0) abort(); //TODO
-	else {
-		this->__EM_train(train_set, N_clusters, likelihood_story);
-	}
+	this->__EM_train(train_set, this->Clusters.size(), likelihood_story);
 
 }
 
-struct Gaussian_Mixture_Model::Train_set::Sample_handler {
-	static std::list<Eigen::VectorXf>* get_samples(Gaussian_Mixture_Model::Train_set& set) { return &set.Samples; };
-};
+void Gaussian_Mixture_Model::__EM_train(const Train_set&   train_set, const size_t& N_clusters, list<float>* likelihood_story) {
 
-void Gaussian_Mixture_Model::__EM_train(Train_set&   train_set, const size_t& N_clusters, list<float>* likelihood_story) {
+	if (N_clusters == 0)
+		abort();
+
+	Train_set t_temp(train_set);
 
 	if (likelihood_story != NULL)
 		likelihood_story->clear();
 
-	auto sample_raw = Gaussian_Mixture_Model::Train_set::Sample_handler::get_samples(train_set);
-	list<VectorXf>* Samples = Gaussian_Mixture_Model::Train_set::Sample_handler::get_samples(train_set);
+	auto Samples = Gaussian_Mixture_Model::Train_set::Sample_handler::get_samples(t_temp);
 
 	auto it_s = Samples->begin();
 	if (this->Clusters.size() != N_clusters) {
@@ -483,5 +483,82 @@ Gaussian_Mixture_Model::Gaussian_Mixture_Model(const size_t& N_clusters, const s
 	Train_set temp(samples);
 
 	this->__EM_train(temp, N_clusters, NULL);
+
+}
+
+void Gaussian_Mixture_Model::__copy(const Gaussian_Mixture_Model& to_clone) {
+
+	this->Clusters.clear();
+	for (auto it = to_clone.Clusters.begin(); it != to_clone.Clusters.end(); it++) {
+		this->Clusters.push_back(cluster());
+		this->Clusters.back().Mean = it->Mean;
+		this->Clusters.back().Covariance = it->Covariance;
+		this->Clusters.back().Inverse_Cov = it->Inverse_Cov;
+		this->Clusters.back().Abs_Deter_Cov = it->Abs_Deter_Cov;
+		this->Clusters.back().weight = it->weight;
+	}
+
+}
+
+Gaussian_Mixture_Model::Gaussian_Mixture_Model(const Train_set& train_set, const std::list<size_t>& N_clusters_to_try, std::list<std::list<float>>* likelihood_story) {
+
+	if (N_clusters_to_try.empty()) abort();
+
+	struct GMM_info {
+		Gaussian_Mixture_Model*		model;
+		list<float>					log_lkl;
+	};
+	list<GMM_info> trials;
+
+	list<list<float>> temp;
+	for (auto it = N_clusters_to_try.begin(); it != N_clusters_to_try.end(); it++) {
+		trials.push_back(GMM_info());
+		trials.back().model = new Gaussian_Mixture_Model(train_set, *it, &temp);
+		trials.back().log_lkl = temp.front();
+	}
+
+	GMM_info* best_fitting = &trials.front();
+	auto it = trials.begin(); it++;
+	for (it; it != trials.end(); it++) {
+		if (it->log_lkl.back() > best_fitting->log_lkl.back())
+			best_fitting = &(*it);
+	}
+
+	this->__copy(*best_fitting->model);
+
+	if (likelihood_story != NULL) {
+		likelihood_story->clear();
+		for (it = trials.begin(); it != trials.end(); it++)
+			likelihood_story->push_back(it->log_lkl);
+	}
+
+	for (it = trials.begin(); it != trials.end(); it++)
+		delete it->model;
+
+}
+
+Gaussian_Mixture_Model::Gaussian_Mixture_Model(const Train_set& train_set, const size_t& N_clusters, const bool& do_trials, std::list<std::list<float>>* likelihood_story) {
+
+	if (do_trials) {
+		if (N_clusters == 0) abort();
+
+		list<size_t> trials;
+		for (size_t k = 0; k < N_clusters; k++)
+			trials.push_back(k);
+
+		auto twin_temp = new Gaussian_Mixture_Model(train_set, trials, likelihood_story);
+		this->__copy(*twin_temp);
+		delete twin_temp;
+
+	}
+	else {
+		if (likelihood_story == NULL)
+			this->__EM_train(train_set, N_clusters, NULL);
+		else {
+			likelihood_story->clear();
+			likelihood_story->push_back(list<float>());
+			this->__EM_train(train_set, N_clusters, &likelihood_story->front());
+		}
+	}
 
 }
