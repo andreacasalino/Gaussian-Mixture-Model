@@ -212,6 +212,20 @@ void Gaussian_Mixture_Model::K_means::do_clustering(std::list<std::list<Eigen::V
 
 
 
+void normalize_list(list<float>& l) {
+
+	float s = 0.f;
+	auto it = l.begin();
+	for (it; it != l.end(); it++)
+		s += *it;
+
+	if (abs(s) < 1e-7) return;
+
+	for (it = l.begin(); it != l.end(); it++)
+		*it = *it / s;
+
+}
+
 void eval_Normal_Log_density(float* den, VectorXf& Mean, MatrixXf& invCov, float& absDetCov, VectorXf& X) {
 
 	*den = (X - Mean).transpose() * invCov * (X - Mean);
@@ -219,6 +233,14 @@ void eval_Normal_Log_density(float* den, VectorXf& Mean, MatrixXf& invCov, float
 	*den += logf(absDetCov);
 
 	*den *= -0.5f;
+
+}
+
+Gaussian_Mixture_Model::cluster::cluster(const float& w, const Eigen::VectorXf& M, const Eigen::MatrixXf& C):
+	weight(w), Mean(M), Covariance(C) {
+
+	this->Inverse_Cov = Covariance.inverse();
+	this->Abs_Deter_Cov = abs(Covariance.determinant());
 
 }
 
@@ -353,20 +375,17 @@ void Gaussian_Mixture_Model::__EM_train(const Train_set&   train_set, const size
 
 		K_means::do_clustering(&clst, *Samples, N_clusters);
 		this->Clusters.clear();
+		VectorXf M_temp(clst.front().front()->size());
+		MatrixXf C_temp(clst.front().front()->size(), clst.front().front()->size());
 		for (auto it = clst.begin(); it != clst.end(); it++) {
-			this->Clusters.push_back(cluster());
-			
-			get_mean(&this->Clusters.back().Mean, &(*it));
-			this->Clusters.back().Covariance = MatrixXf(this->Clusters.back().Mean.size(), this->Clusters.back().Mean.size());
-			this->Clusters.back().Covariance.setZero();
+			get_mean(&M_temp, &(*it));
+			C_temp.setZero();
 			for (it_s = Samples->begin(); it_s != Samples->end(); it_s++) {
-				this->Clusters.back().Covariance += (*it_s - this->Clusters.back().Mean) * (*it_s - this->Clusters.back().Mean).transpose();
+				C_temp += (*it_s - M_temp) * (*it_s - M_temp).transpose();
 			}
-			this->Clusters.back().Covariance *= 1.f / (float)Samples->size();
+			C_temp *= 1.f / (float)Samples->size();
 
-			this->Clusters.back().weight = 1.f / (float)this->Clusters.size();
-			this->Clusters.back().Inverse_Cov = this->Clusters.back().Covariance.inverse();
-			this->Clusters.back().Abs_Deter_Cov = abs(this->Clusters.back().Covariance.determinant());
+			this->Clusters.push_back(cluster(1.f / (float)clst.size(), M_temp, C_temp));
 		}
 	}
 
@@ -489,14 +508,8 @@ Gaussian_Mixture_Model::Gaussian_Mixture_Model(const size_t& N_clusters, const s
 void Gaussian_Mixture_Model::__copy(const Gaussian_Mixture_Model& to_clone) {
 
 	this->Clusters.clear();
-	for (auto it = to_clone.Clusters.begin(); it != to_clone.Clusters.end(); it++) {
-		this->Clusters.push_back(cluster());
-		this->Clusters.back().Mean = it->Mean;
-		this->Clusters.back().Covariance = it->Covariance;
-		this->Clusters.back().Inverse_Cov = it->Inverse_Cov;
-		this->Clusters.back().Abs_Deter_Cov = it->Abs_Deter_Cov;
-		this->Clusters.back().weight = it->weight;
-	}
+	for (auto it = to_clone.Clusters.begin(); it != to_clone.Clusters.end(); it++)
+		this->Clusters.push_back(*it);
 
 }
 
@@ -559,6 +572,79 @@ Gaussian_Mixture_Model::Gaussian_Mixture_Model(const Train_set& train_set, const
 			likelihood_story->push_back(list<float>());
 			this->__EM_train(train_set, N_clusters, &likelihood_story->front());
 		}
+	}
+
+}
+
+Gaussian_Mixture_Model::Gaussian_Mixture_Model(const std::list<float>& weights, const  std::list<Eigen::VectorXf>& Means, const std::list<Eigen::MatrixXf>& Covariances) {
+
+	if (weights.empty()) abort();
+	if (weights.size() != Means.size()) abort();
+	if (weights.size() != Covariances.size()) abort();
+
+	size_t n = Means.front().size();
+	if (n == 0) abort();
+
+	list<float> w(weights);
+	normalize_list(w);
+
+	auto it_M = Means.begin();
+	auto it_C = Covariances.begin();
+	for (auto it_w = w.begin(); it_w != w.end(); it_w) {
+
+		if (*it_w <= 0.f) abort();
+		if (it_M->size() != n) abort();
+		if (it_C->rows() != n) abort();
+		if (it_C->cols() != n) abort();
+
+		this->Clusters.push_back(cluster(*it_w, *it_M, *it_C));
+
+		it_M++;
+		it_C++;
+	}
+
+}
+
+void Gaussian_Mixture_Model::get_parameters(Eigen::MatrixXf* packed_params) {
+
+	size_t N_cluster = this->Clusters.size();
+	size_t n = this->Clusters.front().Mean.size();
+
+	*packed_params = MatrixXf(n*N_cluster, 2 + n);
+	packed_params->setZero();
+	size_t line = 0;
+	for (auto it = this->Clusters.begin(); it != this->Clusters.end(); it++) {
+		(*packed_params)(line , 0) = it->weight;
+		(*packed_params).block(line , 1, n, 1) = it->Mean;
+		(*packed_params).block(line, 2, n, n) = it->Covariance;
+		
+		line += n;
+	}
+
+
+}
+
+Gaussian_Mixture_Model::Gaussian_Mixture_Model(Eigen::MatrixXf& packed_params) {
+
+	size_t n = packed_params.cols() - 2;
+	if (n == 0) abort();
+
+	if ((packed_params.rows() % n) != 0) abort();
+
+	size_t N_cluster = (size_t)((float)packed_params.rows() / (float)n);
+
+	VectorXf M_temp;
+	MatrixXf C_temp;
+	size_t line = 0;
+	for (size_t k = 0; k < N_cluster; k++) {
+		if (packed_params(line, 0) < 0.f) abort();
+
+		M_temp = packed_params.block(line, 1, n, 1);
+		C_temp = packed_params.block(line, 2, n, n);
+
+		this->Clusters.push_back(cluster(packed_params(line, 0), M_temp, C_temp));
+
+		line += n;
 	}
 
 }

@@ -28,13 +28,12 @@ void get_random_samples(list<VectorXf>* samples, VectorXf& Sizes, const size_t& 
 
 }
 
-//plot row wise the vector in the passed list
-void print_Vectors(const string& file_name, list<VectorXf>& Samples)
- {
 
-	ofstream f(file_name);
-	if (!f.is_open())
-		abort();
+
+
+
+void print_Vectors(ostream& f, list<VectorXf>& Samples)
+{
 
 	auto it = Samples.begin();
 	while (it != Samples.end()) {
@@ -43,6 +42,44 @@ void print_Vectors(const string& file_name, list<VectorXf>& Samples)
 		if (it != Samples.end())
 			f << endl;
 	}
+
+}
+
+void print_clusters(ostream& f, list<list<VectorXf*>>& Samples) {
+
+	list<VectorXf*>::iterator it2;
+	size_t k = 0;
+	for (auto it = Samples.begin(); it != Samples.end(); it++) {
+		for (it2 = it->begin(); it2 != it->end(); it2++)
+			f << k << " " << (*it2)->transpose() << endl;
+		k++;
+	}
+
+}
+
+void print_Matrix(ostream& f, Eigen::MatrixXf& Mat) {
+
+	size_t r, c, R = Mat.rows(), C = Mat.cols();
+	for (r = 0; r < R; r++) {
+		for (c = 0; c < C; c++) {
+			f << " " << Mat(r, c);
+		}
+		f << endl;
+	}
+
+}
+
+
+
+//plot row wise the vector in the passed list
+void print_Vectors(const string& file_name, list<VectorXf>& Samples)
+ {
+
+	ofstream f(file_name);
+	if (!f.is_open())
+		abort();
+
+	print_Vectors(f, Samples);
 
 	f.close();
 
@@ -55,44 +92,19 @@ void print_clusters(const string& file_name, list<list<VectorXf*>>& Samples) {
 	if (!f.is_open())
 		abort();
 
-	list<VectorXf*>::iterator it2;
-	size_t k = 0;
-	for (auto it = Samples.begin(); it != Samples.end(); it++) {
-		for (it2 = it->begin(); it2 != it->end(); it2++)
-			f << k << " " << (*it2)->transpose() << endl;
-		k++;
-	}
+	print_clusters(f, Samples);
 
 	f.close();
 
 }
 
-void print_GMM_params(const string& file_name, std::list<float>& weights, std::list<Eigen::VectorXf>& Means, std::list<Eigen::MatrixXf>& Covariances) {
+void print_Matrix(const string& file_name, Eigen::MatrixXf& Mat) {
 
 	ofstream f(file_name);
 	if (!f.is_open())
 		abort();
 
-	auto it_w = weights.begin();
-	auto it_M = Means.begin();
-	auto it_C = Covariances.begin();
-
-	size_t n = it_M->size(), r;
-
-	for (it_w; it_w != weights.end(); it_w++) {
-
-		for (r = 0; r < n; r++) {
-			if (r == 0) f << *it_w << " ";
-			else f << 0.f << " ";
-
-			f << (*it_M)(r) << " ";
-			f << it_C->row(r);
-			f << endl;
-		}
-
-		it_M++;
-		it_C++;
-	}
+	print_Matrix(f, Mat);
 
 	f.close();
 

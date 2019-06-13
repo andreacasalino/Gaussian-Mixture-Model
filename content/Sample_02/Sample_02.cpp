@@ -17,19 +17,17 @@ int main() {
 	GMM_rand.Get_samples(&GMM_samples, 500);
 	print_Vectors("__Sampled_points", GMM_samples);
 
-	list<float> w;
-	list<VectorXf> Means;
-	list<MatrixXf> Covs;
-	GMM_rand.get_parameters(&w, &Means, &Covs);
-	print_GMM_params("GMM_random", w, Means, Covs);
+	MatrixXf params;
+	GMM_rand.get_parameters(&params);
+	print_Matrix("GMM_random", params);
 
 // import the sampled points a training set
 	Gaussian_Mixture_Model::Train_set train_set("__Sampled_points");
 
 // build a new GMM, with the previous points passed for completing the EM algorithm
 	Gaussian_Mixture_Model GMM_trained(train_set, N_cluster);
-	GMM_trained.get_parameters(&w, &Means, &Covs);
-	print_GMM_params("GMM_trained", w, Means, Covs);
+	GMM_trained.get_parameters(&params);
+	print_Matrix("GMM_trained", params);
 
 // classify the points in the training set
 	list<VectorXf> GMM_trained_labels;

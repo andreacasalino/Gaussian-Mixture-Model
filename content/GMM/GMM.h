@@ -10,6 +10,7 @@
 
 class Gaussian_Mixture_Model {
 public:
+
 	struct Train_set {
 		Train_set(const Train_set& to_clone);
 		Train_set(const std::string& file_to_read);
@@ -34,8 +35,6 @@ public:
 		static void do_clustering(std::list<std::list<Eigen::VectorXf*>>* clusters, std::list<Eigen::VectorXf>& Samples, const size_t& N_means);
 	};
 
-
-
 // When specifying do_trials = true, training is done for every possible number of clusters in the list = 1,2,3,....,N_clusters
 // and the solution maximising the likelyhood of the training set is selected.
 // Otherwise is done considering only the passed number of clusters.
@@ -52,6 +51,11 @@ public:
 // build a random GMM with the specified number of clusters
 	Gaussian_Mixture_Model(const size_t& N_clusters, const size_t& dimension_size);
 
+// build a GMM passing the info taken from another GMM with GMM::get_parameters(std::list<float>* weights, std::list<Eigen::VectorXf>* Means, std::list<Eigen::MatrixXf>* Covariances)
+	Gaussian_Mixture_Model(const std::list<float>& weights,const  std::list<Eigen::VectorXf>& Means,const std::list<Eigen::MatrixXf>& Covariances);
+// build a GMM passing the info taken from another GMM with GMM::get_parameters(Eigen::MatrixXf* packed_params)
+	Gaussian_Mixture_Model(Eigen::MatrixXf& packed_params);
+
 // methods
 
 // The same number of clusters determined when building this class is assumed for this new training session
@@ -63,9 +67,14 @@ public:
 	void Get_samples(std::list<Eigen::VectorXf>* samples, const size_t& NUmber_of_samples);
 
 	void get_parameters(std::list<float>* weights, std::list<Eigen::VectorXf>* Means, std::list<Eigen::MatrixXf>* Covariances);
+	void get_parameters(Eigen::MatrixXf* packed_params);
+
 	size_t get_clusters_number() { return this->Clusters.size(); };
+	size_t get_Feature_size() { return this->Clusters.front().Mean.size(); };
 private:
 	struct cluster {
+		cluster(const float& w, const Eigen::VectorXf& M, const Eigen::MatrixXf& C);
+
 		Eigen::VectorXf   Mean;
 		Eigen::MatrixXf   Covariance;
 		Eigen::MatrixXf   Inverse_Cov;
