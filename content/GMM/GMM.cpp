@@ -5,12 +5,11 @@
 #include <fstream>
 #include <string>
 #include <sstream>
-#include <random>
 using namespace std;
 #include <Eigen\Cholesky>
 using namespace Eigen;
 
-#define log_2_pi logf(2.f * 3.141592f);
+#define log_2_pi logf(2.f * 3.141592f)
 default_random_engine generator;
 #define MAX_ITER_EM 1000
 
@@ -236,10 +235,20 @@ void eval_Normal_Log_density(float* den, VectorXf& Mean, MatrixXf& invCov, float
 
 }
 
+void invert_symm_positive(MatrixXf* Sigma_inverse, MatrixXf& Sigma) {
+
+	//LLT<MatrixXf> lltOfCov(Sigma);
+	//MatrixXf L(lltOfCov.matrixL());
+	//*Sigma_inverse = L * L.transpose();
+
+	*Sigma_inverse = Sigma.inverse();
+
+}
+
 Gaussian_Mixture_Model::cluster::cluster(const float& w, const Eigen::VectorXf& M, const Eigen::MatrixXf& C):
 	weight(w), Mean(M), Covariance(C) {
 
-	this->Inverse_Cov = Covariance.inverse();
+	invert_symm_positive(&this->Inverse_Cov , Covariance);
 	this->Abs_Deter_Cov = abs(Covariance.determinant());
 
 }
@@ -273,22 +282,11 @@ void Gaussian_Mixture_Model::Classify(VectorXf* label_density, VectorXf& X) {
 		k++;
 	}
 
-	*label_density = (1.f / label_density->sum()) * (*label_density);
+	*label_density *= (1.f / label_density->sum());
 
 }
 
-class Gaussian_sampler {
-public:
-	Gaussian_sampler(VectorXf* Mean, MatrixXf& Sigma);
-
-	void get_sample(VectorXf* sample);
-private:
-	VectorXf*						Trasl;
-	MatrixXf						Rot;
-	normal_distribution<float>		gauss_iso;
-};
-
-Gaussian_sampler::Gaussian_sampler(VectorXf* Mean, MatrixXf& Sigma) : gauss_iso(0.f, 1.f) {
+Gaussian_sampler::Gaussian_sampler(VectorXf& Mean, MatrixXf& Sigma) : gauss_iso(0.f, 1.f) {
 
 	this->Trasl = Mean;
 	LLT<MatrixXf> lltOfCov(Sigma);
@@ -298,12 +296,12 @@ Gaussian_sampler::Gaussian_sampler(VectorXf* Mean, MatrixXf& Sigma) : gauss_iso(
 
 void Gaussian_sampler::get_sample(VectorXf* sample) {
 
-	*sample = VectorXf(this->Trasl->size());
-	for (size_t k = 0; k < (size_t)this->Trasl->size(); k++)
+	*sample = VectorXf(this->Trasl.size());
+	for (size_t k = 0; k < (size_t)this->Trasl.size(); k++)
 		(*sample)(k) = gauss_iso(generator);
 
 	*sample = this->Rot * *sample;
-	*sample += *this->Trasl;
+	*sample += this->Trasl;
 
 }
 
@@ -329,7 +327,7 @@ void Gaussian_Mixture_Model::Get_samples(std::list<Eigen::VectorXf>* samples, co
 
 	for (auto it = this->Clusters.begin(); it != this->Clusters.end(); it++) {
 		w_as_list.push_back(it->weight);
-		Samplers.push_back(new Gaussian_sampler(&it->Mean, it->Covariance));
+		Samplers.push_back(new Gaussian_sampler(it->Mean, it->Covariance));
 	}
 
 	samples->clear();
@@ -437,7 +435,7 @@ void Gaussian_Mixture_Model::__EM_train(const Train_set&   train_set, const size
 			it_c->Covariance *= 1.f / n(c);
 			c++;
 
-			it_c->Inverse_Cov = it_c->Covariance.inverse();
+			invert_symm_positive(&it_c->Inverse_Cov , it_c->Covariance);
 			it_c->Abs_Deter_Cov = abs(it_c->Covariance.determinant());
 		}
 
@@ -480,6 +478,24 @@ void Gaussian_Mixture_Model::get_parameters(std::list<float>* weights, std::list
 		weights->push_back(it->weight);
 		Means->push_back(it->Mean);
 		Covariances->push_back(it->Covariance);
+	}
+
+}
+
+void Gaussian_Mixture_Model::__check_eig_Cov() {
+
+	size_t k, K = this->get_Feature_size();
+	for (auto it = this->Clusters.begin(); it != this->Clusters.end(); it++) {
+		EigenSolver<MatrixXf> eig_solv(it->Covariance);
+		auto eigs = eig_solv.eigenvalues();
+		
+	//check all values are sufficient high
+		for (k = 0; k < K; k++) {
+			if ( abs (eigs(k).real()) < 0.0001f ) {
+				system("ECHO warning: detected at least one cluster with a too low covariance");
+				return;
+			}
+		}
 	}
 
 }
@@ -548,6 +564,8 @@ Gaussian_Mixture_Model::Gaussian_Mixture_Model(const Train_set& train_set, const
 	for (it = trials.begin(); it != trials.end(); it++)
 		delete it->model;
 
+	this->__check_eig_Cov();
+
 }
 
 Gaussian_Mixture_Model::Gaussian_Mixture_Model(const Train_set& train_set, const size_t& N_clusters, const bool& do_trials, std::list<std::list<float>>* likelihood_story) {
@@ -573,6 +591,8 @@ Gaussian_Mixture_Model::Gaussian_Mixture_Model(const Train_set& train_set, const
 			this->__EM_train(train_set, N_clusters, &likelihood_story->front());
 		}
 	}
+
+	this->__check_eig_Cov();
 
 }
 
@@ -602,6 +622,8 @@ Gaussian_Mixture_Model::Gaussian_Mixture_Model(const std::list<float>& weights, 
 		it_M++;
 		it_C++;
 	}
+
+	this->__check_eig_Cov();
 
 }
 
@@ -646,5 +668,7 @@ Gaussian_Mixture_Model::Gaussian_Mixture_Model(Eigen::MatrixXf& packed_params) {
 
 		line += n;
 	}
+
+	this->__check_eig_Cov();
 
 }

@@ -7,6 +7,18 @@
 
 #include <list>
 #include <Eigen\Dense>
+#include <random>
+
+class Gaussian_sampler {
+public:
+	Gaussian_sampler(Eigen::VectorXf& Mean, Eigen::MatrixXf& Sigma);
+
+	void get_sample(Eigen::VectorXf* sample);
+private:
+	Eigen::VectorXf						Trasl;
+	Eigen::MatrixXf						Rot;
+	std::normal_distribution<float>		    gauss_iso;
+};
 
 class Gaussian_Mixture_Model {
 public:
@@ -85,6 +97,7 @@ private:
 	void __EM_train(const Train_set&   train_set, const size_t& N_clusters, std::list<float>* likelihood_story);
 	void __eval_log_density(float* den, Eigen::VectorXf& X);
 	void __copy(const Gaussian_Mixture_Model& to_clone);
+	void __check_eig_Cov();
 // data
 	std::list<cluster> Clusters;
 };
