@@ -278,7 +278,7 @@ void Gaussian_Mixture_Model::Classify(VectorXf* label_density, VectorXf& X) {
 	float temp;
 	for (auto it = this->Clusters.begin(); it != this->Clusters.end(); it++) {
 		eval_Normal_Log_density(&temp, it->Mean, it->Inverse_Cov, it->Abs_Deter_Cov, X);
-		(*label_density)(k) = expf(temp);
+		(*label_density)(k) = expf(logf(it->weight) + temp);
 		k++;
 	}
 
