@@ -26,7 +26,12 @@ public:
 	struct Train_set {
 		Train_set(const Train_set& to_clone);
 		Train_set(const std::string& file_to_read);
-		Train_set(const std::list<Eigen::VectorXf>& samples);
+		//cluster_initial_guess is optionally used to inform the GMM trainer to start learning from a specified 
+		//set of initial clusters. cluster_initial_guess is a list with the same length of samples, 
+	    //specifying for every sample the cluster index. For example : {0,0,1,1,2}.
+		//In the previous example it is prescribed that the first two samples are in the first cluster and the last three in the third (this
+		// will be valid only for the initial guess).
+		Train_set(const std::list<Eigen::VectorXf>& samples, const std::list<size_t>& cluster_initial_guess = std::list<size_t>());
 		~Train_set() { if (!this->was_cloned) delete this->Samples; };
 
 		struct Sample_handler;
@@ -38,8 +43,9 @@ public:
 
 		void						__import_samples(const std::list<Eigen::VectorXf>& s);
 
-		bool						was_cloned;
-		std::list<Eigen::VectorXf>  *Samples;
+		bool								   was_cloned;
+		std::list<Eigen::VectorXf>*			   Samples;
+		std::list<std::list<Eigen::VectorXf*>> initial_guess_clusters;
 	};
 
 	class K_means {

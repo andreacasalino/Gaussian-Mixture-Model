@@ -59,6 +59,7 @@ Gaussian_Mixture_Model::Train_set::Train_set(const Train_set& to_clone) {
 
 	this->was_cloned = true;
 	this->Samples = to_clone.Samples;
+	this->initial_guess_clusters = to_clone.initial_guess_clusters;
 
 }
 
@@ -85,14 +86,57 @@ Gaussian_Mixture_Model::Train_set::Train_set(const std::string& file_to_read) : 
 
 }
 
-Gaussian_Mixture_Model::Train_set::Train_set(const std::list<Eigen::VectorXf>& samples) : Train_set() {
+Gaussian_Mixture_Model::Train_set::Train_set(const std::list<Eigen::VectorXf>& samples, const std::list<size_t>& cluster_initial_guess) : Train_set() {
 
 	this->__import_samples(samples); 
+
+	if (!cluster_initial_guess.empty()) {
+
+		if (cluster_initial_guess.size() != this->Samples->size())
+			abort();
+
+		size_t N_Clusters = 0;
+		auto it_c = cluster_initial_guess.begin();
+		for (it_c; it_c != cluster_initial_guess.end(); it_c++) {
+			if (*it_c > N_Clusters)
+				N_Clusters = *it_c;
+		}
+		N_Clusters++;
+		for (size_t k = 0; k < N_Clusters; k++)
+			this->initial_guess_clusters.push_back(list<VectorXf*>());
+
+		auto it_cl = this->initial_guess_clusters.begin();
+		it_c = cluster_initial_guess.begin();
+		auto it_S = this->Samples->begin();
+		for (it_S; it_S != this->Samples->end(); it_S++) {
+			if (*it_c >= N_Clusters)
+				abort();
+
+			it_cl = this->initial_guess_clusters.begin();
+			advance(it_cl, *it_c);
+
+			it_cl->push_back(&(*it_S));
+
+			it_c++;
+		}
+
+		for (it_cl = this->initial_guess_clusters.begin(); it_cl != this->initial_guess_clusters.end(); it_cl++) {
+			if (it_cl->empty())
+				abort();
+		}
+
+	}
 
 };
 
 struct Gaussian_Mixture_Model::Train_set::Sample_handler {
-	static list<VectorXf>* get_samples(Gaussian_Mixture_Model::Train_set& set) { return set.Samples; };
+	static list<VectorXf>*			get_samples(Gaussian_Mixture_Model::Train_set& set) { return set.Samples; };
+	static list<list<VectorXf*>>*	get_initial_guess(Gaussian_Mixture_Model::Train_set& set) { 
+		if (set.initial_guess_clusters.empty())
+			return NULL;
+		else
+			return &set.initial_guess_clusters;  
+	};
 };
 
 
@@ -371,7 +415,13 @@ void Gaussian_Mixture_Model::__EM_train(const Train_set&   train_set, const size
 	//initialize clusters with k-means
 		list<list<VectorXf*>> clst;
 
-		K_means::do_clustering(&clst, *Samples, N_clusters);
+		auto initial_guess = Gaussian_Mixture_Model::Train_set::Sample_handler::get_initial_guess(t_temp);
+
+		if ((initial_guess != NULL) && (initial_guess->size() == N_clusters))
+			clst = *initial_guess;
+		else
+			K_means::do_clustering(&clst, *Samples, N_clusters);
+
 		this->Clusters.clear();
 		VectorXf M_temp(clst.front().front()->size());
 		MatrixXf C_temp(clst.front().front()->size(), clst.front().front()->size());
