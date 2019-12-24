@@ -1,43 +1,41 @@
+/**
+ * Author:    Andrea Casalino
+ * Created:   03.12.2019
+*
+* report any bug to andrecasa91@gmail.com.
+ **/
+
 #include "../GMM/GMM.h"
 #include <iostream>
-#include "../GMM/Utilities.h"
-#include <time.h>
-
+#include <fstream>
+using namespace std;
+using namespace Eigen;
 
 int main() {
 
-	srand((unsigned int)time(0));
-	size_t N_cluster = 6;
+	//sample a random 3d GMM model
+	size_t N_clusters = 6;
+	Gaussian_Mixture_Model random_model(N_clusters, 3);
 
-//build a random GMM
-	Gaussian_Mixture_Model GMM_rand(N_cluster, 2);
+	//get samples from the random model
+	list<VectorXf>  train_set;
+	size_t	train_set_size = 1000;
+	random_model.Get_samples(&train_set, train_set_size);
 
-// retrieve samples from the built GMM
-	list<VectorXf> GMM_samples;
-	GMM_rand.Get_samples(&GMM_samples, 500);
-	print_Vectors("__Sampled_points", GMM_samples);
+	//fit a model considering the sampled train set
+	Gaussian_Mixture_Model::Train_set set(train_set);
+	Gaussian_Mixture_Model learnt_model(N_clusters, set);
 
+	//log the two models to visually check the differences
 	MatrixXf params;
-	GMM_rand.get_parameters(&params);
-	print_Matrix("GMM_random", params);
+	params = random_model.get_parameters_as_matrix();
+	ofstream f_random("../Result_visualization/random_model");
+	f_random << params;
+	f_random.close();
+	params = learnt_model.get_parameters_as_matrix();
+	ofstream f_learnt("../Result_visualization/learnt_model");
+	f_learnt << params;
+	f_learnt.close();
 
-// import the sampled points a training set
-	Gaussian_Mixture_Model::Train_set train_set("__Sampled_points");
-
-// build a new GMM, with the previous points passed for completing the EM algorithm
-	Gaussian_Mixture_Model GMM_trained(train_set, N_cluster);
-	GMM_trained.get_parameters(&params);
-	print_Matrix("GMM_trained", params);
-
-// classify the points in the training set
-	list<VectorXf> GMM_trained_labels;
-	GMM_trained.Classify(&GMM_trained_labels, GMM_samples);
-
-// export the previous classification
-	print_Vectors("__Sampled_points_classification", GMM_trained_labels);
-
-//launch the Matlab example Main.m in the same folder to see the resuls
-
-	system("pause");
 	return 0;
 }

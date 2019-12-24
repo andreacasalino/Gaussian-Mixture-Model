@@ -1,29 +1,41 @@
+/**
+ * Author:    Andrea Casalino
+ * Created:   03.12.2019
+*
+* report any bug to andrecasa91@gmail.com.
+ **/
+
 #include "../GMM/GMM.h"
 #include <iostream>
-#include "../GMM/Utilities.h"
+#include <fstream>
+using namespace std;
+using namespace Eigen;
 
 int main() {
 
-	size_t N_sample = 500;
+//sample a random 2d GMM model
 	size_t N_clusters = 5;
+	Gaussian_Mixture_Model random_model( N_clusters, 2);
 
-//produce a list of random samples
-	VectorXf Cube_Sizes(2);
-	Cube_Sizes << 1.f, 1.f;
-	list<VectorXf> samples;
+//get samples from the random model
+	list<VectorXf>  train_set;
+	size_t	train_set_size = 500;
+	random_model.Get_samples(&train_set, train_set_size);
 
-	get_random_samples(&samples, Cube_Sizes, N_sample);
-	print_Vectors("__Sampled_points", samples);
+//fit a model considering the sampled train set
+	Gaussian_Mixture_Model::Train_set set(train_set);
+	Gaussian_Mixture_Model learnt_model(N_clusters, set);
 
-// apply k means to the sampled points
-	list<list<VectorXf*>> clusters;
-	Gaussian_Mixture_Model::K_means::do_clustering(&clusters, samples, N_clusters);
-
-	//print the samples, with labels specifying corresponding assigned the cluster
-	print_clusters("__Clustered_points", clusters);
-
-//launch the Matlab example Main.m in the same folder to see the resuls
-
-	system("pause");
+//log the two models to visually check the differences
+	MatrixXf params;
+	params = random_model.get_parameters_as_matrix();
+	ofstream f_random("../Result_visualization/random_model");
+	f_random << params;
+	f_random.close();
+	params = learnt_model.get_parameters_as_matrix();
+	ofstream f_learnt("../Result_visualization/learnt_model");
+	f_learnt << params;
+	f_learnt.close();
+	
 	return 0;
 }
