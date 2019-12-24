@@ -6,9 +6,6 @@
  **/
 
 
-
-//TODO usare template per lasciare possibilità ad utente di avere Xf o Xd
-
 #pragma once
 #ifndef _GMM__H__
 #define _GMM__H__
