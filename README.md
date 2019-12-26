@@ -18,3 +18,5 @@ Sample_01/Sample_01.cpp
 Sample_02/Sample_02.cpp
 Sample_03/Sample_03.cpp
 Sample_04/Sample_04.cpp
+
+In the folders of the Samples you can find also some python scripts for visualize the results
