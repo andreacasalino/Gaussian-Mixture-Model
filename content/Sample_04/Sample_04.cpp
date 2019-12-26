@@ -29,10 +29,10 @@ int main() {
 
 // sample some points in different region of the spaces
 	list<VectorXf> Samples;
-	size_t sectors = 4;
+	size_t sectors = 5;
 	float angle = 0.f;
 	for (size_t k = 0; k < sectors; k++) {
-		get_samples_in_circle(&Samples, 6.f * cosf(angle), 6.f * sinf(angle), 2.f, 20);
+		get_samples_in_circle(&Samples, 6.f * cosf(angle), 6.f * sinf(angle), 2.f, 50);
 		angle += 2.f *(float)M_PI / (float)sectors;
 	}
 	Gaussian_Mixture_Model::Train_set set(Samples);
@@ -42,7 +42,7 @@ int main() {
 	Gaussian_Mixture_Model::K_means_clustering(&clusters, set, sectors);
 
 // save data for posterior plotting
-	ofstream f("../Result_visualization/K_means_clustering");
+	ofstream f("K_means_clustering");
 	auto it_s = clusters.front().begin();
 	VectorXf temp;
 	size_t id = 0;
@@ -52,6 +52,8 @@ int main() {
 		id++;
 	}
 	f.close();
+
+	//use the python script Visualize.py to see the results
 
 	return 0;
 }

@@ -611,6 +611,54 @@ Eigen::MatrixXf Gaussian_Mixture_Model::get_parameters_as_matrix() const {
 
 }
 
+void print_vector(string* S, const VectorXf& V) {
+
+	*S += "[";
+	*S += to_string(V(0));
+	for (size_t k = 1;  k < (size_t)V.size(); k++) {
+		*S += ",";
+		*S += to_string(V(k));
+	}
+	*S += "]";
+
+}
+void append_cluster(string* S, const Gaussian_Mixture_Model::cluster& cl) {
+
+	*S += "\n{";
+
+	*S += "\"w\":" + to_string(cl.weight) + ",\n";
+
+	*S += "\"Mean\":" ;
+	print_vector(S, cl.Mean);
+	*S += ",\n";
+
+	*S += "\"Covariance\":";
+	*S += "[";
+	print_vector(S, cl.Covariance.row(0));
+	for (size_t k = 1; k < (size_t)cl.Covariance.rows(); k++) {
+		*S += ",";
+		print_vector(S, cl.Covariance.row(k));
+	}
+	*S += "]\n";
+
+	*S += "}\n";
+}
+string Gaussian_Mixture_Model::get_paramaters_as_JSON() const {
+
+	string param ="[";
+	auto it = this->Clusters.begin();
+	append_cluster(&param, *it);
+	it++;
+	for (it; it != this->Clusters.end(); it++) {
+		param += ",";
+		append_cluster(&param, *it);
+	}
+	param += "]";
+
+	return param;
+
+}
+
 float Gaussian_Mixture_Model::Get_KULLBACK_LEIBLER_divergence_MonteCarlo(const Gaussian_Mixture_Model& other) const {
 
 	if (this->get_Space_size() != other.get_Space_size()) throw INVALID_INPUT;

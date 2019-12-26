@@ -27,15 +27,17 @@ int main() {
 	Gaussian_Mixture_Model learnt_model(N_clusters, set);
 
 //log the two models to visually check the differences
-	MatrixXf params;
-	params = random_model.get_parameters_as_matrix();
-	ofstream f_random("../Result_visualization/random_model");
+	string params;
+	params = random_model.get_paramaters_as_JSON();
+	ofstream f_random("random_model.json");
 	f_random << params;
 	f_random.close();
-	params = learnt_model.get_parameters_as_matrix();
-	ofstream f_learnt("../Result_visualization/learnt_model");
+	params = learnt_model.get_paramaters_as_JSON();
+	ofstream f_learnt("learnt_model.json");
 	f_learnt << params;
 	f_learnt.close();
 	
+	//use the python script Visualize.py to see the results
+
 	return 0;
 }

@@ -199,12 +199,17 @@ DIVERGENCE BETWEEN GAUSSIAN MIXTURE MODELS" (Durrieu et al) is considered.
 	\details Here the parameters are put in Matrix of numbers.
 	*/
 	Eigen::MatrixXf										get_parameters_as_matrix()  const;
+	/** \brief Similar to get_parameters_as_matrix.
+	\details Here the parameters are put in a JSON.
+	*/
+	std::string															get_paramaters_as_JSON() const;
 	/** \brief Get the number of clusters in the model
 	*/
 	size_t															get_clusters_number()  const { return this->Clusters.size(); };
 	/** \brief Get the size of the domain in which the mixture is defined
 	*/
 	size_t															get_Space_size()  const { return this->Clusters.front().Mean.size(); };
+
 
 private:
 
