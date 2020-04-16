@@ -18,6 +18,7 @@ using namespace Eigen;
 
 
 #define log_2_pi logf(2.f * 3.141592f)
+#define PI_GREEK 3.14159f
 default_random_engine generator;
 
 
@@ -696,7 +697,7 @@ float Divergence_Normals(const Gaussian_Mixture_Model::cluster& f, const Gaussia
 
 float t_operator(const Gaussian_Mixture_Model::cluster& f, const Gaussian_Mixture_Model::cluster& g) {
 
-	float temp = -f.Mean.size()*logf(2.f * M_PI);
+	float temp = -f.Mean.size()*logf(2.f * PI_GREEK);
 	MatrixXf S = f.Covariance;
 	S += g.Covariance;
 	temp -= logf(S.determinant());
@@ -749,7 +750,7 @@ void Gaussian_Mixture_Model::Get_KULLBACK_LEIBLER_divergence_estimate(const Gaus
 		temp3 = logf(temp3);
 		*lower_bound += this->Clusters[a].weight * (temp2 - temp3);
 
-		temp += this->Clusters[a].weight * 0.5f * logf(powf(2.f*M_PI* 2.71828f, (float)this->Clusters[a].Mean.size()) * this->Clusters[a].Abs_Deter_Cov);
+		temp += this->Clusters[a].weight * 0.5f * logf(powf(2.f* PI_GREEK * 2.71828f, (float)this->Clusters[a].Mean.size()) * this->Clusters[a].Abs_Deter_Cov);
 	}
 
 	*upper_bound += temp;
