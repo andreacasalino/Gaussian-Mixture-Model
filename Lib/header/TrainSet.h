@@ -38,6 +38,7 @@ namespace gmm {
 		template<typename Collection>
 		TrainSet(const Collection& samples) 
 			: TrainSet(samples.front()) {
+			if (samples.empty()) throw Error("training set can't be empty");
 			auto it = samples.begin();
 			++it;
 			this->addSamples(it, samples.end());

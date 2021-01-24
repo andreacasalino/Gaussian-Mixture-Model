@@ -9,6 +9,11 @@
 #include <fstream>
 
 namespace gmm {
+    TrainSet::TrainSet(const V& initialSample) {
+        if (0 == initialSample.size()) throw Error("initial sample can't be empty");
+        this->Samples.push_back(initialSample);
+    }
+
     TrainSet& TrainSet::operator==(const TrainSet& o) {
         if (o.Samples.front().size() != this->Samples.front().size()) {
             throw Error("Train sets have different samples size");
@@ -27,10 +32,10 @@ namespace gmm {
         }
         return slices;
     }
-    TrainSet::TrainSet(const std::string& file_to_read) {
+    std::list<V> importSamples(const std::string& file_to_read) {
         std::list<V> samples;
         std::ifstream f(file_to_read);
-        if(!f.is_open()) {
+        if (!f.is_open()) {
             throw Error("Invalid file to import train set");
         }
         std::string line;
@@ -48,6 +53,8 @@ namespace gmm {
                 slices.pop_front();
             }
         }
-        this->addSamples(samples.begin(), samples.end());
+        return samples;
+    }
+    TrainSet::TrainSet(const std::string& file_to_read) : TrainSet(importSamples(file_to_read)) {
     }
 }

@@ -63,12 +63,12 @@ def plot_GMM(file, ax, color):
     
 fig = plt.figure()
 ax = fig.gca(projection='3d')
-lim = plot_GMM('random_model.json',ax,[0,1,0])
+lim = plot_GMM('random_model3d.json',ax,[0,1,0])
 plt.title('real model cluster covariances (trasparency proportional to the clusters weigths)')
 plt.show() 
 
 fig = plt.figure()
 ax = fig.gca(projection='3d')
-lim = plot_GMM('learnt_model.json',ax,[0,1,0])
+lim = plot_GMM('learnt_model3d.json',ax,[0,1,0])
 plt.title('learnt model cluster covariances (trasparency proportional to the clusters weigths)')
 plt.show() 
