@@ -1,0 +1,60 @@
+%% Creator: Inkscape inkscape 0.92.1, www.inkscape.org
+%% PDF/EPS/PS + LaTeX output extension by Johan Engelen, 2010
+%% Accompanies image file 'normal_05.pdf' (pdf, eps, ps)
+%%
+%% To include the image in your LaTeX document, write
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics{<filename>.pdf}
+%% To scale the image, write
+%%   \def\svgwidth{<desired width>}
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics[width=<desired width>]{<filename>.pdf}
+%%
+%% Images with a different path to the parent latex file can
+%% be accessed with the `import' package (which may need to be
+%% installed) using
+%%   \usepackage{import}
+%% in the preamble, and then including the image with
+%%   \import{<path to file>}{<filename>.pdf_tex}
+%% Alternatively, one can specify
+%%   \graphicspath{{<path to file>/}}
+%% 
+%% For more information, please see info/svg-inkscape on CTAN:
+%%   http://tug.ctan.org/tex-archive/info/svg-inkscape
+%%
+\begingroup%
+  \makeatletter%
+  \providecommand\color[2][]{%
+    \errmessage{(Inkscape) Color is used for the text in Inkscape, but the package 'color.sty' is not loaded}%
+    \renewcommand\color[2][]{}%
+  }%
+  \providecommand\transparent[1]{%
+    \errmessage{(Inkscape) Transparency is used (non-zero) for the text in Inkscape, but the package 'transparent.sty' is not loaded}%
+    \renewcommand\transparent[1]{}%
+  }%
+  \providecommand\rotatebox[2]{#2}%
+  \ifx\svgwidth\undefined%
+    \setlength{\unitlength}{1190.39486382bp}%
+    \ifx\svgscale\undefined%
+      \relax%
+    \else%
+      \setlength{\unitlength}{\unitlength * \real{\svgscale}}%
+    \fi%
+  \else%
+    \setlength{\unitlength}{\svgwidth}%
+  \fi%
+  \global\let\svgwidth\undefined%
+  \global\let\svgscale\undefined%
+  \makeatother%
+  \begin{picture}(1,0.8313819)%
+    \put(0,0){\includegraphics[width=\unitlength,page=1]{normal_05.pdf}}%
+    \put(0.53500419,0.20312015){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\footnotesize{$R,\mu$}}}}%
+    \put(0.64525521,0.47563491){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\footnotesize{$y_1$}}}}%
+    \put(0.47847647,0.60002094){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\footnotesize{$y_2$}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=2]{normal_05.pdf}}%
+    \put(0.41571046,0.56237507){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\footnotesize{$Y$}}}}%
+    \put(0.32286614,0.4825398){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\footnotesize{$X$}}}}%
+  \end{picture}%
+\endgroup%
