@@ -51,10 +51,10 @@ namespace gmm {
 	}
 
 	bool checkCovariance(const M& Cov) {
-		size_t K = (size_t)Cov.cols();
-		size_t c;
-		for (size_t r = 0; r < K; r++) {
-			for (c = (r + 1); c < K; c++) {
+		std::size_t K = (std::size_t)Cov.cols();
+		std::size_t c;
+		for (std::size_t r = 0; r < K; ++r) {
+			for (c = (r + 1); c < K; ++c) {
 				if (abs(Cov(r, c) - Cov(c, r)) > 1e-5) return false;
 			}
 		}
@@ -63,7 +63,7 @@ namespace gmm {
 		auto eigs = eig_solv.eigenvalues();
 
 		//check all values are sufficient high
-		for (size_t k = 0; k < K; k++) {
+		for (std::size_t k = 0; k < K; ++k) {
 			if (abs(eigs(k).real()) < 1e-5) return false;
 		}
 		return true;

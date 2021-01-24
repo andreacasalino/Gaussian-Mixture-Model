@@ -16,7 +16,7 @@ string toJSON(const gmm::GMM& model) {
 		std::stringstream str;
 		str << '[';
 		str << v(0);
-		for (size_t k = 1; k < (size_t)v.size(); ++k) {
+		for (std::size_t k = 1; k < (std::size_t)v.size(); ++k) {
 			str << ',' << v(k);
 		}
 		str << ']';
@@ -30,7 +30,7 @@ string toJSON(const gmm::GMM& model) {
 		str << std::endl << ",\"Mean\":" << printV(cl.Mean);
 		str << std::endl << ",\"Covariance\":[";
 		str << std::endl << printV(cl.Covariance.row(0));
-		for (size_t k = 1; k < (size_t)cl.Covariance.rows(); ++k) {
+		for (std::size_t k = 1; k < (std::size_t)cl.Covariance.rows(); ++k) {
 			str << std::endl << ',' << printV(cl.Covariance.row(k));
 		}
 		str << std::endl << ']';

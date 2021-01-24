@@ -12,7 +12,7 @@ namespace gmm {
 	double GMM::getKullbackLeiblerDiergenceMonteCarlo(const GMM& other) const {
 		if (this->Clusters.front().Mean.size() != other.Clusters.front().Mean.size()) throw Error("The 2 GMM are not comparable");
 		std::list<V> Samples;
-		Samples = this->drawSamples((size_t)this->Clusters.front().Mean.size() * 500);
+		Samples = this->drawSamples((std::size_t)this->Clusters.front().Mean.size() * 500);
 		double div = 0.f;
 		for (auto it = Samples.begin(); it != Samples.end(); ++it) {
 			div += this->getLogDensity(*it);
@@ -50,41 +50,41 @@ namespace gmm {
 		M Divergences(this->Clusters.size(), other.Clusters.size());
 		M t(this->Clusters.size(), other.Clusters.size());
 		M z(this->Clusters.size(), this->Clusters.size());
-		size_t a, A = this->Clusters.size(), b, B = other.Clusters.size();
-		for (a = 0; a < A; a++) {
-			for (b = 0; b < B; b++) {
+		std::size_t a, A = this->Clusters.size(), b, B = other.Clusters.size();
+		for (a = 0; a < A; ++a) {
+			for (b = 0; b < B; ++b) {
 				Divergences(a, b) = divergenceNormals(this->Clusters[a], other.Clusters[b]);
 				t(a, b) = tOperator(this->Clusters[a], other.Clusters[b]);
 			}
 		}
-		for (a = 0; a < A; a++) {
-			for (b = 0; b < A; b++) {
+		for (a = 0; a < A; ++a) {
+			for (b = 0; b < A; ++b) {
 				z(a, b) = tOperator(this->Clusters[a], this->Clusters[b]);
 			}
 		}
 
 		// <lower , upper> bound
 		std::pair<double, double> bound = std::make_pair<double, double>(0.0, 0.0);
-		size_t a2;
+		std::size_t a2;
 		double temp = 0.f, temp2, temp3;
-		for (a = 0; a < A; a++) {
+		for (a = 0; a < A; ++a) {
 			temp2 = 0.f;
-			for (a2 = 0; a2 < A; a2++)  temp2 += this->Clusters[a2].weight * z(a, a2);
+			for (a2 = 0; a2 < A; ++a2)  temp2 += this->Clusters[a2].weight * z(a, a2);
 			temp2 = log(temp2);
 			temp3 = 0.f;
-			for (b = 0; b < B; b++)  temp3 += other.Clusters[b].weight * exp(-Divergences(a, b));
+			for (b = 0; b < B; ++b)  temp3 += other.Clusters[b].weight * exp(-Divergences(a, b));
 			temp3 = log(temp3);
 			bound.second += this->Clusters[a].weight * (temp2 - temp3);
 
 			temp2 = 0.f;
-			for (a2 = 0; a2 < A; a2++)  temp2 += this->Clusters[a2].weight * exp(-Divergences(a, b));
+			for (a2 = 0; a2 < A; ++a2)  temp2 += this->Clusters[a2].weight * exp(-Divergences(a, b));
 			temp2 = log(temp2);
 			temp3 = 0.f;
-			for (b = 0; b < B; b++)  temp3 += other.Clusters[b].weight * t(a, b);
+			for (b = 0; b < B; ++b)  temp3 += other.Clusters[b].weight * t(a, b);
 			temp3 = log(temp3);
 			bound.first += this->Clusters[a].weight * (temp2 - temp3);
 
-			temp += this->Clusters[a].weight * 0.5 * log(pow(2.f * PI_GREEK * 2.71828, (float)this->Clusters[a].Mean.size()) * this->Clusters[a].Abs_Deter_Cov);
+			temp += this->Clusters[a].weight * 0.5 * log(pow(2.f * PI_GREEK * 2.71828, (double)this->Clusters[a].Mean.size()) * this->Clusters[a].Abs_Deter_Cov);
 		}
 
 		bound.second += temp;

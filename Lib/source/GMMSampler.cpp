@@ -20,7 +20,7 @@ namespace gmm {
 
 		V getSample() {
 			V sample(this->Trasl.size());
-			for (size_t k = 0; k < (size_t)this->Trasl.size(); k++)
+			for (std::size_t k = 0; k < (std::size_t)this->Trasl.size(); ++k)
 				sample(k) = gauss_iso(generator);
 			sample = this->Rot * sample;
 			sample += this->Trasl;
@@ -41,7 +41,7 @@ namespace gmm {
 		std::size_t getSample() {
 			double r = static_cast<double>(rand()) / static_cast<double>(RAND_MAX);
 			this->c = 0.0;
-			size_t k = 0;
+			std::size_t k = 0;
 			for (auto it = this->distr.begin(); it != this->distr.end(); ++it) {
 				c += *it;
 				if (r <= c)
@@ -56,7 +56,7 @@ namespace gmm {
 		double c;
 	};
 
-	std::list<V> GMM::drawSamples(const size_t& Number_of_samples) const {
+	std::list<V> GMM::drawSamples(const std::size_t& Number_of_samples) const {
 		std::vector<double>			wDistr;
 		std::vector<GaussianSampler> gSamplers;
 
@@ -69,7 +69,7 @@ namespace gmm {
 		DiscreteSampler dSampler(wDistr);
 
 		std::list<V> samples;
-		for (size_t k = 0; k < Number_of_samples; ++k) {
+		for (std::size_t k = 0; k < Number_of_samples; ++k) {
 			samples.push_back(gSamplers[dSampler.getSample()].getSample());
 		}
 		return samples;

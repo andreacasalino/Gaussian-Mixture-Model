@@ -8,14 +8,14 @@
 #include "Utils.h"
 #include <header/KMeans.h>
 
-void addSamplesFromCircle(std::list<gmm::V>& samples, const double& x, const double& y, const double& ray, const size_t& N_sample);
+void addSamplesFromCircle(std::list<gmm::V>& samples, const double& x, const double& y, const double& ray, const std::size_t& N_sample);
 
 int main() {
 // sample some points in different region of the spaces
 	list<gmm::V> Samples;
-	size_t sectors = 5;
+	std::size_t sectors = 5;
 	double angle = 0.0;
-	for (size_t k = 0; k < sectors; ++k) {
+	for (std::size_t k = 0; k < sectors; ++k) {
 		addSamplesFromCircle(Samples, 6.0 * cos(angle), 6.0 * sin(angle), 2.0, 50);
 		angle += 2.0 * static_cast<double>(3.14159) / static_cast<double>(sectors);
 	}
@@ -29,7 +29,7 @@ int main() {
 	ofstream f("K_means_clustering");
 	auto it_s = clusters.front().begin();
 	gmm::V temp;
-	size_t id = 0;
+	std::size_t id = 0;
 	for (auto it_cl = clusters.begin(); it_cl != clusters.end(); ++it_cl) {
 		for (it_s = it_cl->begin(); it_s != it_cl->end(); ++it_s)
 			f << id << " " << (*it_s)->transpose() << endl;
@@ -42,10 +42,10 @@ int main() {
 	return EXIT_SUCCESS;
 }
 
-void addSamplesFromCircle(std::list<gmm::V>& samples, const double& x, const double& y, const double& ray, const size_t& N_sample) {
+void addSamplesFromCircle(std::list<gmm::V>& samples, const double& x, const double& y, const double& ray, const std::size_t& N_sample) {
 	double r;
 	double teta;
-	for (size_t k = 0; k < N_sample; ++k) {
+	for (std::size_t k = 0; k < N_sample; ++k) {
 		r = (static_cast<double>(rand()) / static_cast<double>(RAND_MAX))* ray;
 		teta = 2.0 * static_cast<double>(3.14159)* static_cast<double>(rand()) / static_cast<double>(RAND_MAX);
 		samples.emplace_back(2);

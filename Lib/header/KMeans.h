@@ -20,7 +20,7 @@ namespace gmm {
 	* @param[out] clusters results of the K means clustering. Every element in the list is a cluster, represented by the list of samples
 	put in that cluster (const pointers points to elements in Samples).
 	*/
-	void kMeansClustering(std::vector<std::list<const V*>>& clusters, const TrainSet& Samples, const size_t& N_cluster, const size_t& Iterations = 1000);
+	void kMeansClustering(std::vector<std::list<const V*>>& clusters, const TrainSet& Samples, const std::size_t& N_cluster, const std::size_t& Iterations = 1000);
 }
 
 #endif

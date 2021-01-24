@@ -13,7 +13,7 @@
 #include <limits>
 
 namespace gmm {
-	std::unique_ptr<std::vector<std::list<const V*>>> validateInitialLabeling(const size_t& N_clusters, const std::list<V>& Samples, const GMM::TrainInfo& info) {
+	std::unique_ptr<std::vector<std::list<const V*>>> validateInitialLabeling(const std::size_t& N_clusters, const std::list<V>& Samples, const GMM::TrainInfo& info) {
 		if (info.initialLabeling.empty()) return nullptr;
 		if (info.initialLabeling.size() != Samples.size()) throw Error("Inconsistent number of labels for the passed initial guess");
 		std::unique_ptr<std::vector<std::list<const V*>>> clusters = std::make_unique<std::vector<std::list<const V*>>>();
@@ -35,7 +35,7 @@ namespace gmm {
 		return clusters;
 	}
 
-	double GMM::ExpectationMaximization(const TrainSet& train_set, const size_t& N_clusters, const TrainInfo& info) {
+	double GMM::ExpectationMaximization(const TrainSet& train_set, const std::size_t& N_clusters, const TrainInfo& info) {
 		if (0 == N_clusters) throw Error("Invalid number of clusters");
 		const std::list<V>& Samples = train_set.GetSamples();
 
@@ -59,7 +59,7 @@ namespace gmm {
 			this->appendCluster(1.0 / static_cast<double>(clst.size()) , Mean, Cov);
 		}
 		//EM loop
-		size_t Iter = info.maxIterations;
+		std::size_t Iter = info.maxIterations;
 		if (Iter < N_clusters) Iter = N_clusters;
 		int R = static_cast<int>(Samples.size());
 		int C = static_cast<int>(this->Clusters.size());

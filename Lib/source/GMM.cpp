@@ -11,19 +11,19 @@
 using namespace std;
 
 namespace gmm {
-	GMM::GMM(const size_t& N_clusters, const TrainSet& train_set, const TrainInfo& info) {
+	GMM::GMM(const std::size_t& N_clusters, const TrainSet& train_set, const TrainInfo& info) {
 		this->ExpectationMaximization(train_set, N_clusters, info);
 	}
 
-	GMM::GMM(const size_t& N_clusters, const size_t& dimension_size) {
+	GMM::GMM(const std::size_t& N_clusters, const std::size_t& dimension_size) {
 		if (0 == N_clusters) throw Error("Invalid number of clusters");
 		if (0 == dimension_size) throw Error("Invalid space size");
 
-		size_t N_sample = 100 * N_clusters;
+		std::size_t N_sample = 100 * N_clusters;
 
 		list<V> samples;
-		size_t kk;
-		for (size_t k = 0; k < N_sample; ++k) {
+		std::size_t kk;
+		for (std::size_t k = 0; k < N_sample; ++k) {
 			samples.emplace_back(dimension_size);
 			for (kk = 0; kk < dimension_size; ++kk)
 				samples.back()(kk) = 2.0 * static_cast<double>(rand()) / static_cast<double>(RAND_MAX) - 1.0;
@@ -32,15 +32,15 @@ namespace gmm {
 	}
 
 	GMM::GMM(const M& params) {
-		size_t x = (size_t)params.cols();
-		size_t Ncl = (size_t)params.rows() / (x + 2);
+		std::size_t x = (std::size_t)params.cols();
+		std::size_t Ncl = (std::size_t)params.rows() / (x + 2);
 		if (Ncl * (x + 2) != params.rows()) throw Error("Invalid GMM parameters");
 
-		size_t r;
+		std::size_t r;
 		V Mean(x);
 		M Cov(x, x);
 		double w;
-		for (size_t k = 0; k < Ncl; ++k) {
+		for (std::size_t k = 0; k < Ncl; ++k) {
 			w = params((2 + x) * k, 0);
 			if (w < 0) throw Error("Invalid GMM parameters");
 			if (w > 1.f) throw Error("Invalid GMM parameters");
@@ -54,7 +54,7 @@ namespace gmm {
 		}
 	}
 
-	GMM GMM::fitOptimalModel(const TrainSet& train_set, const std::vector<size_t>& N_clusters_to_try, const size_t& Iterations) {
+	GMM GMM::fitOptimalModel(const TrainSet& train_set, const std::vector<std::size_t>& N_clusters_to_try, const std::size_t& Iterations) {
 		if (N_clusters_to_try.empty()) throw Error("invalid clusters sizes to try");
 
 		struct model {
@@ -62,7 +62,7 @@ namespace gmm {
 			double lkl;
 		};
 		list<model> models;
-		for (auto it = N_clusters_to_try.begin(); it != N_clusters_to_try.end(); it++) {
+		for (auto it = N_clusters_to_try.begin(); it != N_clusters_to_try.end(); ++it) {
 			models.push_back(model());
 			TrainInfo info;
 			info.maxIterations = Iterations;
@@ -72,15 +72,15 @@ namespace gmm {
 
 		auto it = models.begin();
 		model* best_model = &(*it);
-		it++;
-		for (it; it != models.end(); it++) {
+		++it;
+		for (it; it != models.end(); ++it) {
 			if (it->lkl > best_model->lkl)
 				best_model = &(*it);
 		}
 
 		GMM temp(*best_model->model);
 
-		for (it = models.begin(); it != models.end(); it++) delete it->model;
+		for (it = models.begin(); it != models.end(); ++it) delete it->model;
 
 		return temp;
 	}
@@ -121,15 +121,15 @@ namespace gmm {
 	}
 
 	M GMM::getMatrixParameters() const {
-		size_t D = 2 + this->Clusters.front().Mean.size();
+		std::size_t D = 2 + this->Clusters.front().Mean.size();
 		M Matr(this->Clusters.size() * D, this->Clusters.front().Mean.size());
-		size_t r, R = this->Clusters.front().Mean.size();
-		for (size_t k = 0; k < this->Clusters.size(); k++) {
+		std::size_t r, R = this->Clusters.front().Mean.size();
+		for (std::size_t k = 0; k < this->Clusters.size(); ++k) {
 			Matr.row(D * k).setZero();
 			Matr.row(D * k)(0) = this->Clusters[k].weight;
 			Matr.row(D * k + 1) = this->Clusters[k].Mean.transpose();
 
-			for (r = 0; r < R; r++)
+			for (r = 0; r < R; ++r)
 				Matr.row(D * k + r + 2) = this->Clusters[k].Covariance.row(r);
 		}
 		return Matr;

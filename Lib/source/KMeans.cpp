@@ -25,7 +25,7 @@ namespace gmm {
 		return true;
 	};
 
-	std::vector<V> Forgy_init(const std::list<V>& samplesList, const size_t& N_means) {
+	std::vector<V> Forgy_init(const std::list<V>& samplesList, const std::size_t& N_means) {
 		std::list<const V*> samples;
 		std::for_each(samplesList.begin(), samplesList.end(), [&samples](const V& v) {
 			samples.push_back(&v);
@@ -33,9 +33,9 @@ namespace gmm {
 
 		std::vector<V> Means;
 		Means.reserve(N_means);
-		size_t pos_rand;
+		std::size_t pos_rand;
 		auto it_s = samples.begin();
-		for (size_t k = 0; k < N_means; k++) {
+		for (std::size_t k = 0; k < N_means; ++k) {
 			pos_rand = rand() % samples.size();
 			it_s = samples.begin();
 			advance(it_s, pos_rand);
@@ -45,7 +45,7 @@ namespace gmm {
 		return Means;
 	};
 
-	void kMeansClustering(std::vector<std::list<const V*>>& clusters, const TrainSet& Samples, const size_t& N_cluster, const size_t& Iterations) {
+	void kMeansClustering(std::vector<std::list<const V*>>& clusters, const TrainSet& Samples, const std::size_t& N_cluster, const std::size_t& Iterations) {
 		const std::list<V>& samplesList = Samples.GetSamples();
 
 		if (0 == N_cluster) throw Error("Invalid number of clusters");
@@ -53,16 +53,16 @@ namespace gmm {
 
 
 		clusters.clear();
-		for (size_t k = 0; k < N_cluster; ++k) clusters.push_back({});
+		for (std::size_t k = 0; k < N_cluster; ++k) clusters.push_back({});
 		std::vector<V> Means = Forgy_init(samplesList, N_cluster);
 
-		size_t Iter = Iterations;
+		std::size_t Iter = Iterations;
 		if (Iter < N_cluster) Iter = N_cluster;
 
 		double dist_min, temp;
-		size_t pos_nearest, kk;
+		std::size_t pos_nearest, kk;
 		std::vector<std::list<const V*>> old_clustering;
-		for (size_t k = 0; k < Iter; ++k) {
+		for (std::size_t k = 0; k < Iter; ++k) {
 			// recompute clusters
 			for (kk = 0; kk < clusters.size(); ++kk ) {
 				clusters[kk].clear();

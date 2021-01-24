@@ -33,13 +33,13 @@ namespace gmm {
 			std::size_t maxIterations = 1000;
 			std::list<std::size_t> initialLabeling; // when passed empty is ingored
 		};
-		GMM(const size_t& N_clusters, const TrainSet& train_set, const TrainInfo& info = TrainInfo());
+		GMM(const std::size_t& N_clusters, const TrainSet& train_set, const TrainInfo& info = TrainInfo());
 
 		/** \brief Build a random GMM with the specified number of clusters and space size.
 		* @param[in] N_cluster the number of clusters to put in the model
 		* @param[in] dimension_size the size of the space of the GMM to create
 		*/
-		GMM(const size_t& N_clusters, const size_t& dimension_size);
+		GMM(const std::size_t& N_clusters, const std::size_t& dimension_size);
 
 		/** \brief Build a GMM model, assuming the paramaters contained in the passed matrix.
 		\details Gaussian_Mixture_Model::get_parameters_as_matrix can be used to extract the parameters (in a matricial form) of a GMM model.
@@ -56,7 +56,7 @@ namespace gmm {
 		* @param[in] N_clusters_to_try the number of clusters to try
 		* @param[out] train_set_lklhood the likelihood of the training set of best model (the one returned)
 		*/
-		static GMM fitOptimalModel(const TrainSet& train_set, const std::vector<size_t>& N_clusters_to_try, const size_t& Iterations = 1000);
+		static GMM fitOptimalModel(const TrainSet& train_set, const std::vector<std::size_t>& N_clusters_to_try, const std::size_t& Iterations = 1000);
 
 		/** \brief Evaluates the logarithmic density of the mixture into a specified point.
 		* @param[in] X the point for which the density must be evaluated
@@ -77,7 +77,7 @@ namespace gmm {
 		* @param[in] Number_of_samples the number of samples to draw
 		* @param[out] samples
 		*/
-		std::list<V> drawSamples(const size_t& Number_of_samples) const;
+		std::list<V> drawSamples(const std::size_t& Number_of_samples) const;
 
 		/** \brief Estimate the Kullback-Leibler divergence of this model w.r.t. the one passed as input
 		\details Since the exact compuation is not possible, a Monte carlo approach is followed. The number of samples
@@ -112,7 +112,7 @@ namespace gmm {
 		//scale();
 
 	private:
-		double ExpectationMaximization(const TrainSet& train_set, const size_t& N_clusters, const TrainInfo& info);
+		double ExpectationMaximization(const TrainSet& train_set, const std::size_t& N_clusters, const TrainInfo& info);
 		void  appendCluster(const double& w, const V& mean, const M& cov);
 
 	// data
