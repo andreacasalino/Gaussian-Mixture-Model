@@ -5,11 +5,12 @@
 *
 * report any bug to andrecasa91@gmail.com.
 """
-from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 import matplotlib.pyplot as plt
+import matplotlib
+from matplotlib.patches import Polygon
+from matplotlib.collections import PatchCollection
 import json
 import numpy as np
-from scipy.spatial import ConvexHull
 
 
 def get_json_from_file(name):
@@ -23,36 +24,27 @@ def get_R(covariance_matrix):
         R[:,i] = R[:,i] * np.sqrt(E[i]) 
     return R
        
-def plot_facet(x, y, z, ax, col, alp):
-    ax.add_collection3d(Poly3DCollection([list(zip(x,y,z))], edgecolor=col, facecolors=col, alpha=alp, linewidth=0))
+def plot_Polygon(V, ax, col, alp):
+    patches = []
+    polygon = Polygon(V, True)
+    patches.append(polygon)
+    p = PatchCollection(patches, cmap=matplotlib.cm.jet, alpha=alp, color=col)
+    ax.add_collection(p)
  
-def plot_CH(Vertices, color, ax, alp):  
-    Vertices_array = np.array(Vertices)
-    hull = ConvexHull(Vertices_array)
-    for s in hull.simplices:
-        s = np.append(s, s[0])  # Here we cycle back to the first coordinate
-        plot_facet(Vertices_array[s, 0], Vertices_array[s, 1], Vertices_array[s, 2], ax, color, alp)
-        ax.plot(Vertices_array[s, 0], Vertices_array[s, 1], Vertices_array[s, 2] , '.', color=color, markersize=0.001)
-
 def plot_cluster(ax, cluster, color):
        
-    psi = np.linspace(0, 2 * np.pi, num=20)
-    teta = np.linspace(-0.5 * np.pi, 0.5 * np.pi, num=10)
+    teta = np.linspace(0, 2 * np.pi, num=50)
     C = []
     R = get_R(cluster['Covariance']);
-    
-    for p in psi:
-        for t in teta:
-            V = [np.cos(p)*np.cos(t), np.sin(p)*np.cos(t), np.sin(t)]
-            new_x = R[0,0] * V[0] + R[0,1] * V[1] + R[0,2] * V[2] +  cluster['Mean'][0]
-            new_y = R[1,0] * V[0] + R[1,1] * V[1] + R[1,2] * V[2] +  cluster['Mean'][1]
-            new_z = R[2,0] * V[0] + R[2,1] * V[1] + R[2,2] * V[2] +  cluster['Mean'][2]
-            C.append([new_x,new_y,new_z])
-    
-    plot_CH(C, color, ax, cluster['w']);
-    ax.plot([cluster['Mean'][0]] ,[cluster['Mean'][1]], [cluster['Mean'][2]] , '*k', markersize=4)
-    ax.text(cluster['Mean'][0] ,cluster['Mean'][1], cluster['Mean'][2] , r"$w$=" + str(cluster['w']), color='black')
-    
+
+    for t in teta:
+        new_x = R[0,0] * np.cos(t) + R[0,1] * np.sin(t) +  cluster['Mean'][0]
+        new_y = R[1,0] * np.cos(t) + R[1,1] * np.sin(t) +  cluster['Mean'][1]
+        C.append([new_x, new_y])
+
+    plot_Polygon(C , ax, color, cluster['w'])
+    ax.plot([cluster['Mean'][0]] ,[cluster['Mean'][1]] , '*k')
+    ax.text(cluster['Mean'][0] ,cluster['Mean'][1], r"$w$=" + str(cluster['w']), color='black')
 
 
 def plot_GMM(file, ax, color):
@@ -60,15 +52,14 @@ def plot_GMM(file, ax, color):
     
     for k in range(0, len(data)):
         plot_cluster(ax, data[k], color)
+    ax.plot(0, 0 , '.', markersize=0.001)
     
-fig = plt.figure()
-ax = fig.gca(projection='3d')
-lim = plot_GMM('random_model3d.json',ax,[0,1,0])
+fig, ax = plt.subplots()
+lim = plot_GMM('random_model2d.json',ax,[0,1,0])
 plt.title('real model cluster covariances (trasparency proportional to the clusters weigths)')
 plt.show() 
 
-fig = plt.figure()
-ax = fig.gca(projection='3d')
-lim = plot_GMM('learnt_model3d.json',ax,[0,1,0])
+fig, ax = plt.subplots()
+lim = plot_GMM('learnt_model2d.json',ax,[0,1,0])
 plt.title('learnt model cluster covariances (trasparency proportional to the clusters weigths)')
 plt.show() 

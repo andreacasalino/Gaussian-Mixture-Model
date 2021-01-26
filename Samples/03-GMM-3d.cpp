@@ -7,6 +7,9 @@
 
 #include "Utils.h"
 
+/////////////////////////
+// GMM in 3 dimensions //
+/////////////////////////
 int main() {
 //sample a random 3d GMM model
 	size_t N_clusters = 6;
@@ -22,7 +25,7 @@ int main() {
 	print(random_model, "random_model3d.json");
 	print(learnt_model, "learnt_model3d.json");
 
-//use the python script Visualize02.py to see the results
+//use the python script Visualize03.py to see the results
 
 	return EXIT_SUCCESS;
 }

@@ -10,6 +10,9 @@
 
 void addSamplesFromCircle(std::list<gmm::V>& samples, const double& x, const double& y, const double& ray, const std::size_t& N_sample);
 
+////////////////////////////////////////
+// show how to use K-means clustering //
+////////////////////////////////////////
 int main() {
 // sample some points in different region of the spaces
 	list<gmm::V> Samples;
@@ -37,7 +40,7 @@ int main() {
 	}
 	f.close();
 
-//use the python script Visualize04.py to see the results
+//use the python script Visualize01.py to see the results
 
 	return EXIT_SUCCESS;
 }

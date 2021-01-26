@@ -7,6 +7,9 @@
 
 #include "Utils.h"
 
+/////////////////////////
+// GMM in 2 dimensions //
+/////////////////////////
 int main() {
 //sample a random 2d GMM model
 	size_t N_clusters = 5;
@@ -22,7 +25,7 @@ int main() {
 	print(random_model, "random_model2d.json");
 	print(learnt_model, "learnt_model2d.json");
 	
-// use the python script Visualize01.py to see the results
+// use the python script Visualize02.py to see the results
 
 	return EXIT_SUCCESS;
 }

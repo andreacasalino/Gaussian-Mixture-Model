@@ -52,8 +52,8 @@ namespace gmm {
 
 		V Mean;
 		M Cov;
+		this->Clusters.reserve(N_clusters);
 		for (std::size_t k = 0; k < N_clusters; ++k) {
-			this->Clusters.emplace_back();
 			Mean = mean(clst[k]);
 			Cov = covariance(clst[k], Mean);
 			this->appendCluster(1.0 / static_cast<double>(clst.size()) , Mean, Cov);

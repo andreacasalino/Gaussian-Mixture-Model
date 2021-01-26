@@ -5,61 +5,44 @@
 *
 * report any bug to andrecasa91@gmail.com.
 """
+
 import matplotlib.pyplot as plt
-import matplotlib
-from matplotlib.patches import Polygon
-from matplotlib.collections import PatchCollection
-import json
-import numpy as np
+import numpy
+from random import random
 
-
-def get_json_from_file(name):
-    with open(name) as json_file:
-        return json.load(json_file)
-
-def get_R(covariance_matrix):
-    m = np.matrix(covariance_matrix)
-    E, R = np.linalg.eig(m)
-    for i in range(0, len(E)) :
-        R[:,i] = R[:,i] * np.sqrt(E[i]) 
-    return R
-       
-def plot_Polygon(V, ax, col, alp):
-    patches = []
-    polygon = Polygon(V, True)
-    patches.append(polygon)
-    p = PatchCollection(patches, cmap=matplotlib.cm.jet, alpha=alp, color=col)
-    ax.add_collection(p)
- 
-def plot_cluster(ax, cluster, color):
-       
-    teta = np.linspace(0, 2 * np.pi, num=50)
+def get_cols(mat, c):
     C = []
-    R = get_R(cluster['Covariance']);
+    for r in mat:
+        C.append(r[c])
+    return C
 
-    for t in teta:
-        new_x = R[0,0] * np.cos(t) + R[0,1] * np.sin(t) +  cluster['Mean'][0]
-        new_y = R[1,0] * np.cos(t) + R[1,1] * np.sin(t) +  cluster['Mean'][1]
-        C.append([new_x, new_y])
+def get_pos(labels):
+    n_labels = int(max(labels)) + 1
+    pos = []
+    for k in range(0, n_labels):
+        pos.append([])
+    for p in range(0, len(labels)):
+        pp = int(labels[p])
+        pos[pp].append(int(p))
+    return pos
 
-    plot_Polygon(C , ax, color, cluster['w'])
-    ax.plot([cluster['Mean'][0]] ,[cluster['Mean'][1]] , '*k')
-    ax.text(cluster['Mean'][0] ,cluster['Mean'][1], r"$w$=" + str(cluster['w']), color='black')
 
-
-def plot_GMM(file, ax, color):
-    data = get_json_from_file(file)
+def plot_K_means():
+    mat = numpy.loadtxt('K_means_clustering')
+    clusters_pos = get_pos(get_cols(mat,0))
+    colors = []
+    names = []
+    for i in range(0, len(clusters_pos)):
+        colors.append([random(), random(), random()])
+        names.append('cluster' + str(i+1))
+    for i in range(0, len(clusters_pos)):
+        temp = mat[clusters_pos[i]]
+        plt.plot(get_cols(temp,1), get_cols(temp,2), '*', color=colors[i])
+    plt.legend(names)
     
-    for k in range(0, len(data)):
-        plot_cluster(ax, data[k], color)
-    ax.plot(0, 0 , '.', markersize=0.001)
-    
-fig, ax = plt.subplots()
-lim = plot_GMM('random_model2d.json',ax,[0,1,0])
-plt.title('real model cluster covariances (trasparency proportional to the clusters weigths)')
-plt.show() 
 
-fig, ax = plt.subplots()
-lim = plot_GMM('learnt_model2d.json',ax,[0,1,0])
-plt.title('learnt model cluster covariances (trasparency proportional to the clusters weigths)')
+plt.figure()
+plot_K_means()
+plt.axis('equal')   
+plt.title('Results of K-means clustering') 
 plt.show() 

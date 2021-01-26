@@ -11,6 +11,9 @@ std::pair<double, double> getSupport(const vector<double>& values);
 
 std::unique_ptr<gmm::GMM> getSimilarModel(const gmm::GMM& model_to_emulate);
 
+///////////////////////////////////////////////
+// Divergences of high dimensions GMM models //
+///////////////////////////////////////////////
 int main() {
 
 //sample a random high dimensional GMM model
