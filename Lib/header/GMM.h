@@ -114,8 +114,6 @@ namespace gmm {
 
 		inline const std::vector<GMMcluster> getClusters() const { return this->Clusters; };
 
-		//scale();
-
 	private:
 		double ExpectationMaximization(const TrainSet& train_set, const std::size_t& N_clusters, const TrainInfo& info);
 		void  appendCluster(const double& w, const V& mean, const M& cov);

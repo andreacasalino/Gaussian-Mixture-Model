@@ -1,22 +1,13 @@
-All the material is contained in the folder content
+This libary contains the functionalities required to train and handle **Gaussian Mixture Models**, aka **GMM**.
+If you believe to be not really familiar with this object, have a look at ./doc/Gaussian_Mixture_Model.pdf.
 
-GMM/GMM.h and GMM/GMM.cpp contain a class for managing generic n-dimensional Gaussian
-Mixture Model (GMM).
-Gaussian_Mixture_Model.pdf resumes the main generalities about GMM, useful for understanding
-the functionalities proposed.
+**GMM** are trained using the [Expectation Maximization](https://stephens999.github.io/fiveMinuteStats/intro_to_em.html) algorithm.
+It is possible to specify the clustering from which the iterations of the Expectation Maximization start. 
+Otherwise, the [k-means](https://en.wikipedia.org/wiki/K-means_clustering) is internally called to create the starting clustering for the Expectation Maximization.
+k-means is also exposed as a callable stand-alone algorithm.
 
-The Eigen library is exploited : http://eigen.tuxfamily.org/index.php?title=Main_Page.
-Set the folder were you installed Eigen as an additional include directory when compiling.
+This package is completely **cross-platform**: use [CMake](https://cmake.org) to configure the project containig the libary and some samples.
 
-Training is done using Expectation Maximization, with clusters initialized 
-with the k-means classifier.
-K means also exists as a utilities of Gaussian_Mixture_Model that can be 
-used stand alone.
-
-Samples are provided in:
-Sample_01/Sample_01.cpp
-Sample_02/Sample_02.cpp
-Sample_03/Sample_03.cpp
-Sample_04/Sample_04.cpp
-
-In the folders of the Samples you can find also some python scripts for visualize the results
+This library uses [Eigen](http://eigen.tuxfamily.org/index.php?title=Main_Page) as linear algebra engine. 
+However Eigen does not come with this libary: you have to externally download it and set the CMake option variable **EIGEN3_FOLDER** equal to
+the folder where you put Eigen. You can easily use the Cmake [GUI](https://www.youtube.com/watch?v=LxHV-KNEG3k&t=1s) for doing that.
