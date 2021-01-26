@@ -55,11 +55,11 @@ def plot_GMM(file, ax, color):
     ax.plot(0, 0 , '.', markersize=0.001)
     
 fig, ax = plt.subplots()
-lim = plot_GMM('random_model.json',ax,[0,1,0])
+lim = plot_GMM('random_model2d.json',ax,[0,1,0])
 plt.title('real model cluster covariances (trasparency proportional to the clusters weigths)')
 plt.show() 
 
 fig, ax = plt.subplots()
-lim = plot_GMM('learnt_model.json',ax,[0,1,0])
+lim = plot_GMM('learnt_model2d.json',ax,[0,1,0])
 plt.title('learnt model cluster covariances (trasparency proportional to the clusters weigths)')
 plt.show() 
