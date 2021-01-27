@@ -9,6 +9,7 @@
 #define GMM_KMEANS_H
 
 #include "TrainSet.h"
+#include <vector>
 
 namespace gmm {
 	/** @brief K means clustering.

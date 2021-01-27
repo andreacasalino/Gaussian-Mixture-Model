@@ -9,6 +9,7 @@
 #define GMM_GMM_H
 
 #include "TrainSet.h"
+#include <vector>
 
 namespace gmm {
 	typedef Eigen::MatrixXd M;
@@ -31,12 +32,16 @@ namespace gmm {
 		 * @param[in] the information used by the training process
 		 */
 		struct TrainInfo {
+			TrainInfo(const std::size_t& iter = 1000, const std::list<std::size_t>& initClstr = {}) {
+				this->maxIterations = iter;
+				this->initialLabeling = initClstr;
+			};
 			// The maximum number of iterations considered by the expectation maximization algorithm.
-			std::size_t maxIterations = 1000;
+			std::size_t maxIterations;
 			// when passed empty is ingored and the K means is used for building the initial guess
 			std::list<std::size_t> initialLabeling;
 		};
-		GMM(const std::size_t& N_clusters, const TrainSet& train_set, const TrainInfo& info = TrainInfo());
+		GMM(const std::size_t& N_clusters, const TrainSet& train_set, const TrainInfo& info = TrainInfo() );
 
 		/** @brief Build a random GMM with the specified number of clusters and space size.
 		 * @param[in] the number of clusters to put in the model

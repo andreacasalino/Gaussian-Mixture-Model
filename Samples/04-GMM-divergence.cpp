@@ -6,6 +6,7 @@
  **/
 
 #include "Utils.h"
+#include <memory>
 
 std::pair<double, double> getSupport(const vector<double>& values);
 

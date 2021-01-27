@@ -2,7 +2,7 @@ set(PROJECT_SHORTNAME "GMM")
 project(${PROJECT_SHORTNAME} VERSION ${VERSION} LANGUAGES CXX)
 string(REPLACE - _ COMPONENT_NAME ${PROJECT_NAME})
 
-set(sources ${sources} 
+list(APPEND GMM_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/header/GMM.h
 	${CMAKE_CURRENT_SOURCE_DIR}/header/Error.h
 	${CMAKE_CURRENT_SOURCE_DIR}/header/TrainSet.h
@@ -18,9 +18,9 @@ set(sources ${sources}
 )
 
 if(LIB_OPT)
-	add_library(${PROJECT_NAME} SHARED ${sources})
+	add_library(${PROJECT_NAME} SHARED ${GMM_SOURCES})
 else()
-	add_library(${PROJECT_NAME} STATIC ${sources})
+	add_library(${PROJECT_NAME} STATIC ${GMM_SOURCES})
 endif()
 add_library(GMM::${PROJECT_SHORTNAME} ALIAS ${PROJECT_NAME})
 

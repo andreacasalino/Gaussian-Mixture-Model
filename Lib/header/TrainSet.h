@@ -11,6 +11,7 @@
 #include <Eigen/Core>
 #include <Eigen/Dense>
 #include "Error.h"
+#include <list>
 
 namespace gmm {
 	typedef Eigen::VectorXd V;

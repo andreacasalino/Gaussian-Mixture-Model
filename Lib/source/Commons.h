@@ -14,7 +14,7 @@
 
 namespace gmm {
     constexpr double PI_GREEK = 3.14159;
-    static inline double LOG_2_PI = log(2.0 * PI_GREEK);
+    static const double LOG_2_PI = log(2.0 * PI_GREEK);
 
     V mean(const std::list<const V*>& l);
     

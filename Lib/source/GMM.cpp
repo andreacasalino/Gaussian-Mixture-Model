@@ -28,7 +28,7 @@ namespace gmm {
 			for (kk = 0; kk < dimension_size; ++kk)
 				samples.back()(kk) = 2.0 * static_cast<double>(rand()) / static_cast<double>(RAND_MAX) - 1.0;
 		}
-		this->ExpectationMaximization(TrainSet(samples), N_clusters, TrainInfo{});
+		this->ExpectationMaximization(TrainSet(samples), N_clusters, TrainInfo());
 	}
 
 	GMM::GMM(const M& params) {
