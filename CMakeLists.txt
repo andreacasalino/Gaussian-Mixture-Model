@@ -1,11 +1,33 @@
 cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 
-project(Gaussian-Mixture-Model)
 option(LIB_OPT "Compile shared libraries (ON) or static (OFF)" OFF)
-option(BUILD_SAMPLES "Build the samples showing how to use the package" ON)
-set(EIGEN3_FOLDER "C:\\Program Files\\Eigen3" CACHE STRING "C:\\Program Files\\Eigen3")
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+# set macro-directory and find scripts
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
+
+# include cmake custom functions
+set(WITH_SOURCE_TREE ON)
+include(GroupSources)
+include(AutoCollect)
+include(MakeLibrary)
+
+set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+
+project(Gaussian-Mixture-Model)
 add_subdirectory(Lib)
-if(BUILD_SAMPLES)
+
+option(BUILD_GaussianUtils_SAMPLES "Build the samples showing how to use the package" OFF)
+if(BUILD_GaussianUtils_SAMPLES)
+	project(GaussianUtils-Samples)
     add_subdirectory(Samples)
+endif()
+
+option(BUILD_GaussianUtils_TESTS "" OFF)
+if(BUILD_GaussianUtils_TESTS)
+	project(GaussianUtils-Tests)
+    add_subdirectory(Tests)
 endif()
