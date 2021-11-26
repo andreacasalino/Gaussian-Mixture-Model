@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <TrainSet.h>
 #include <GaussianDistribution.h>
 #include <components/DivergenceAware.h>
 #include <components/DrawSamplesCapable.h>
@@ -46,6 +47,17 @@ namespace gauss::gmm {
 		 */
 		Eigen::VectorXd Classify(const Eigen::VectorXd& point) const;
 
+		std::vector<Eigen::VectorXd>
+			drawSamples(const std::size_t samples) const override;
+
+		double evaluateLogDensity(const Eigen::VectorXd& point) const override;
+
+		double evaluateKullbackLeiblerDivergence(
+			const GaussianMixtureModel& other) const override {
+			throw 0;
+			return 0.0;
+		};
+
 		/** @brief Estimate the Kullback-Leibler divergence of this model w.r.t. the one passed as input.
 		 * Since the exact compuation is not possible, a Monte carlo approach is followed. The number of samples
 		 * to assume is internally decided according to the model size.
@@ -66,25 +78,14 @@ namespace gauss::gmm {
 		 */
 		std::pair<double, double> getKullbackLeiblerDiergenceEstimate(const GMM& other) const;
 
-		std::vector<Eigen::VectorXd>
-			drawSamples(const std::size_t samples) const override;
-
-		double evaluateLogDensity(const Eigen::VectorXd& point) const override;
-
-		double evaluateKullbackLeiblerDivergence(
-			const GaussianMixtureModel& other) const override {
-			throw 0;
-			return 0.0;
-		};
-
-		inline const std::vector<GMMcluster> getClusters() const { return this->Clusters; };
+		const std::vector<Cluster>& getClusters() const { return clusters; };
 
 	private:
 		//double ExpectationMaximization(const TrainSet& train_set, const std::size_t& N_clusters, const TrainInfo& info);
 		//void  appendCluster(const double& w, const V& mean, const M& cov);
 
 		// data
-		const std::vector<Cluster> Clusters;
+		const std::vector<Cluster> clusters;
 	};
 
 
@@ -95,6 +96,6 @@ namespace gauss::gmm {
 	 * @param[in] the number of clusters to try
 	 * @param[in] the maximum number of iterations to assume for the expectation maximization (the algorithm can reach a convergence also before)
 	 */
-	static GMM fitOptimalModel(const TrainSet& train_set, const std::vector<std::size_t>& N_clusters_to_try, const std::size_t& Iterations = 1000);
+	std::unique_ptr<GaussianMixtureModel> fitOptimalModel(const TrainSet& train_set, const std::vector<std::size_t>& N_clusters_to_try, const std::size_t& Iterations = 1000);
 
 }
