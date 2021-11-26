@@ -5,12 +5,11 @@
  * report any bug to andrecasa91@gmail.com.
  **/
 
-#ifndef GMM_ERROR_H
-#define GMM_ERROR_H
+#pragma once
 
 #include <stdexcept>
 
-namespace gmm {
+namespace gauss::gmm {
     /** @brief A runtime error that can be raised when using any object in gmm::
      */
     class Error : public std::runtime_error {
@@ -19,5 +18,3 @@ namespace gmm {
         };
     };
 }
-
-#endif

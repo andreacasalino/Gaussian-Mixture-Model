@@ -35,7 +35,7 @@ namespace gauss::gmm {
 
 		struct Cluster {
 			double weight;
-			GaussianDistribution distribution; // maybe make this a smart pointer in order to easily move it
+			std::unique_ptr<GaussianDistribution> distribution; // maybe make this a smart pointer in order to easily move it
 		};
 		GaussianMixtureModel(const std::vector<Cluster>& clusters);
 

@@ -19,10 +19,10 @@ namespace gauss::gmm {
         std::unique_ptr<GaussianMixtureModel> makeRandomModel() const override;
 
         void setClusters(std::size_t new_clusters) { clusters = new_clusters; }
-        GaussianDistributionFactory& getClusterFactory() { return *cluster_factory.get(); };
+        GaussianDistributionFactory& getClusterFactory() { return cluster_factory; };
 
     private:
         std::size_t clusters;
-        std::unique_ptr<GaussianDistributionFactory> cluster_factory;
+        GaussianDistributionFactory cluster_factory;
     };
 } // namespace gauss
