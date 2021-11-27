@@ -12,6 +12,10 @@
 
 namespace gauss::gmm {
 	struct Cluster {
+		Cluster(const double w, GaussianDistribution distribution) 
+			: weight(w)
+			, distribution(distribution) {};
+
 		double weight;
 		GaussianDistribution distribution;
 	};
@@ -77,7 +81,7 @@ namespace gauss::gmm {
 		const std::vector<Cluster>& getClusters() const { return clusters; };
 
 	private:
-		std::size_t monte_carlo_trials;
+		std::size_t monte_carlo_trials = 500;
 		const std::vector<Cluster> clusters;
 	};
 }

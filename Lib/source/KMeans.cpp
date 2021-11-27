@@ -73,7 +73,7 @@ namespace gauss::gmm {
 			});
 			// recompute means
 			for (kk = 0; kk < N_cluster; ++kk) {
-				Means[kk] = mean(clusters[kk]);
+				Means[kk] = computeMean(clusters[kk], [](const auto* sample) {return *sample; });
 			}
 			// check clustering changed w.r.t to previous iteration
 			if (!old_clustering.empty() && (old_clustering == clusters)) {

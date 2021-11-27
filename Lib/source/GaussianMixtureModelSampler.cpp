@@ -16,7 +16,7 @@ namespace gauss::gmm {
         clusters_samplers.reserve(clusters.size());
         for (const auto& cluster : clusters) {
             clusters_weights.push_back(cluster.weight);
-            clusters_weights.emplace_back(*cluster.distribution);
+            clusters_samplers.emplace_back(cluster.distribution);
         }
     }
 
