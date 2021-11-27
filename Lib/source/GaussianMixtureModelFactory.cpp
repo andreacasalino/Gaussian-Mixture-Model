@@ -10,11 +10,16 @@
 
 namespace gauss::gmm {
     GaussianMixtureModelFactory::GaussianMixtureModelFactory(const std::size_t model_size, const std::size_t clusters)
-        : clusters(clusters)
+        : clusters(2)
         , cluster_factory(model_size) {
+        setClusters(clusters);
+    }
+
+    void GaussianMixtureModelFactory::setClusters(std::size_t new_clusters) {
         if (0 == clusters) {
             throw Error("0 clusters not admitted");
         }
+        clusters = new_clusters;
     }
 
     std::unique_ptr<GaussianMixtureModel> GaussianMixtureModelFactory::makeRandomModel() const {

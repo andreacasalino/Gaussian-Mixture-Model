@@ -18,6 +18,26 @@ namespace gauss::gmm {
 								 public DrawSamplesCapable,
 								 public LogDensityAware {
 	public:
+		class Cluster {
+		public:
+			Cluster(const double w, std::unique_ptr<const GaussianDistribution> distribution);
+
+			const double weight;
+			const std::unique_ptr<const GaussianDistribution> distribution;
+
+			inline double getWeightLog() const {
+				if (nullptr == weight_log) {
+					weight_log.reset(new double(log(weight)));
+				}
+				return *weight_log.get();
+			}
+
+
+		private:
+			mutable std::unique_ptr<double> weight_log;
+		};
+		GaussianMixtureModel(const std::vector<Cluster>& clusters);
+
 		/** @brief The GMM is be built using the passed train set using the expectation maximization algorithm.
 		 * The initial guess used to cluster the samples, might be obtained using the K means or directly specified, according
 		 * to the values put in TrainInfo.
@@ -33,12 +53,6 @@ namespace gauss::gmm {
 		};
 		// not really sure it should be placed here
 		GaussianMixtureModel(const std::size_t& N_clusters, const TrainSet& train_set, const TrainInfo& info = TrainInfo());
-
-		struct Cluster {
-			double weight;
-			std::unique_ptr<GaussianDistribution> distribution; // maybe make this a smart pointer in order to easily move it
-		};
-		GaussianMixtureModel(const std::vector<Cluster>& clusters);
 
 		/** @brief Perform classification of a specified input.
 		 * Numbers in the vector returned are the probabilities that X is coming from the corresponding cluster in the model.
