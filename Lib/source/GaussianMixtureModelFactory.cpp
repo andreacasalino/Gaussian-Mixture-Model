@@ -5,8 +5,8 @@
  * report any bug to andrecasa91@gmail.com.
  **/
 
-#include <GaussianMixtureModelFactory.h>
-#include <Error.h>
+#include <GaussianMixtureModel/GaussianMixtureModelFactory.h>
+#include <GaussianMixtureModel/Error.h>
 
 namespace gauss::gmm {
     GaussianMixtureModelFactory::GaussianMixtureModelFactory(const std::size_t model_size, const std::size_t clusters)
@@ -23,7 +23,7 @@ namespace gauss::gmm {
     }
 
     std::unique_ptr<GaussianMixtureModel> GaussianMixtureModelFactory::makeRandomModel() const {
-        std::vector<GaussianMixtureModel::Cluster> clusters_data;
+        std::vector<Cluster> clusters_data;
         clusters_data.reserve(clusters);
         Eigen::VectorXd weights(clusters);
         weights.setRandom();
@@ -36,9 +36,7 @@ namespace gauss::gmm {
             weights *= 1.0 / sum;
         }
         for (std::size_t c = 0; c < clusters; ++c) {
-            clusters_data.emplace_back();
-            clusters_data.back().weight = weights(c);
-            clusters_data.back().distribution = cluster_factory.makeRandomModel();
+            clusters_data.emplace_back(Cluster{ weights(c), cluster_factory.makeRandomModel() });
         }
         return std::make_unique<GaussianMixtureModel>(clusters_data);
     }

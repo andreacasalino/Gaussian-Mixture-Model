@@ -5,7 +5,7 @@
  * report any bug to andrecasa91@gmail.com.
  **/
 
-#include <TrainSet.h>
+#include <GaussianMixtureModel/TrainSet.h>
 #include <fstream>
 
 namespace gauss::gmm {

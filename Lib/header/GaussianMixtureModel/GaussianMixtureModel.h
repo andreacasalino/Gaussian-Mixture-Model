@@ -7,8 +7,8 @@
 
 #pragma once
 
-#include <TrainSet.h>
-#include <GaussianDistribution.h>
+#include <GaussianMixtureModel/TrainSet.h>
+#include <GaussianUtils/GaussianDistribution.h>
 
 namespace gauss::gmm {
 	struct Cluster {

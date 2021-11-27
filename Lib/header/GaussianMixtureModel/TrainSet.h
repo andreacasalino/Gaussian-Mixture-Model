@@ -8,7 +8,7 @@
 #pragma once
 
 #include <Eigen/Core>
-#include <Error.h>
+#include <GaussianMixtureModel/Error.h>
 
 namespace gauss::gmm {
 	/** @brief This object can be used to train GMM models
@@ -34,7 +34,7 @@ namespace gauss::gmm {
 		template<typename Collection>
 		TrainSet(const Collection& samples) 
 			: TrainSet(samples.front()) {
-			if (samples.empty()) throw Error("training set can't be empty");
+			if (samples.empty()) throw gauss::gmm::Error("training set can't be empty");
 			auto it = samples.begin();
 			++it;
 			this->addSamples(it, samples.end());
@@ -63,9 +63,9 @@ namespace gauss::gmm {
 			std::size_t pos = 0;
 			for (auto it = samplesBegin; it != samplesEnd; ++it) {
 				if (samples.front().size() != it->size()) {
-					throw Error("found invalid size for sample " + pos);
+					throw gauss::gmm::Error("found invalid size for sample " + pos);
 				}
-				this->Samples.push_back(*it);
+				samples.push_back(*it);
 				++pos;
 			}
 		};

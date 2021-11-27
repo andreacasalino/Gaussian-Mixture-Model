@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <TrainSet.h>
+#include <GaussianMixtureModel/TrainSet.h>
 #include <vector>
 #include <list>
 

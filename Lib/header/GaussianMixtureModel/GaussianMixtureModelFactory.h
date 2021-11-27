@@ -7,8 +7,8 @@
 
 #pragma once
 
-#include <GaussianMixtureModel.h>
-#include <GaussianDistributionFactory.h>
+#include <GaussianMixtureModel/GaussianMixtureModel.h>
+#include <GaussianUtils/GaussianDistributionFactory.h>
 
 namespace gauss::gmm {
     class GaussianMixtureModelFactory

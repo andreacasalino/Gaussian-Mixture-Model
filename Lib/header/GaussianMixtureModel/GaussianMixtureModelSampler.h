@@ -7,8 +7,8 @@
 
 #pragma once
 
-#include <GaussianDistributionSampler.h>
-#include <GaussianMixtureModel.h>
+#include <GaussianUtils/GaussianDistributionSampler.h>
+#include <GaussianMixtureModel/GaussianMixtureModel.h>
 
 namespace gauss::gmm {
     class GaussianMixtureModelSampler {

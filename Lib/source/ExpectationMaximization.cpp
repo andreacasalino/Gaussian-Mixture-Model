@@ -7,12 +7,12 @@
 
 #pragma once
 
-#include <ExpectationMaximization.h>
+#include <GaussianMixtureModel/ExpectationMaximization.h>
 #include "EvaluateLogDensity.h"
-#include <Utils.h>
+#include <GaussianUtils/Utils.h>
 #include <algorithm>
 #include <limits>
-#include <KMeans.h>
+#include <GaussianMixtureModel/KMeans.h>
 
 namespace gauss::gmm {
 	namespace {
@@ -73,7 +73,7 @@ namespace gauss::gmm {
 		for (std::size_t k = 0; k < N_clusters; ++k) {
 			Eigen::VectorXd Mean;
 			Eigen::MatrixXd Cov;
-			Cov = covariance(clst[k], Mean);
+			Cov = computeCovariance(clst[k], Mean, [](const Eigen::VectorXd* sample) { return *sample; });
 			clusters.emplace_back();
 			clusters.back().weight = 1.0 / static_cast<double>(clst.size());
 			clusters.back().distribution = std::make_unique<GaussianDistribution>(Mean, Cov);

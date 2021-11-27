@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <GaussianMixtureModel.h>
+#include <GaussianMixtureModel/GaussianMixtureModel.h>
 
 namespace gauss::gmm {
 	/** @brief The GMM is be built using the passed train set using the expectation maximization algorithm.

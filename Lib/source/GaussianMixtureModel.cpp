@@ -7,11 +7,11 @@
 
 #pragma once
 
-#include <GaussianMixtureModel.h>
-#include <GaussianMixtureModelSampler.h>
-#include <Error.h>
+#include <GaussianMixtureModel/GaussianMixtureModel.h>
+#include <GaussianMixtureModel/GaussianMixtureModelSampler.h>
+#include <GaussianMixtureModel/Error.h>
 #include "EvaluateLogDensity.h"
-#include <ExpectationMaximization.h>
+#include <GaussianMixtureModel/ExpectationMaximization.h>
 
 namespace gauss::gmm {
     namespace {

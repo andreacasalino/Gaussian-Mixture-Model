@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <GaussianDistribution.h>
+#include <GaussianUtils/GaussianDistribution.h>
 
 namespace gauss::gmm {
     double evaluate_log_density(const Eigen::VectorXd& point, const std::vector<double>& weights, const std::vector<const GaussianDistribution*>& distributions);

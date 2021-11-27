@@ -5,9 +5,9 @@
  * report any bug to andrecasa91@gmail.com.
  **/
 
-#include <KMeans.h>
+#include <GaussianMixtureModel/KMeans.h>
 #include <algorithm>
-#include <Utils.h>
+#include <GaussianUtils/Utils.h>
 
 namespace gauss::gmm {
 	namespace {
