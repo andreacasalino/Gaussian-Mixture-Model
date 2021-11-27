@@ -10,6 +10,7 @@
 #include <GaussianMixtureModel.h>
 #include <GaussianMixtureModelSampler.h>
 #include <Error.h>
+#include "EvaluateLogDensity.h"
 
 namespace gauss::gmm {
     std::vector<GaussianMixtureModel::Cluster> check_and_make_clusters(const std::vector<GaussianMixtureModel::Cluster>& clusters) {
@@ -58,11 +59,14 @@ namespace gauss::gmm {
     }
 
     double GaussianMixtureModel::evaluateLogDensity(const Eigen::VectorXd& point) const {
-        double den = 0.0;
-        for (Eigen::Index k = 0; k < clusters.size(); ++k) {
-            den += exp(log(clusters[k].weight) + clusters[k].distribution.evaluateLogDensity(point));
+        std::vector<double> weights;
+        weights.reserve(clusters.size());
+        std::vector<const GaussianDistribution*> distributions;
+        distributions.reserve(clusters.size());
+        for (const auto&  cluster : clusters) {
+            weights.push_back(cluster.weight);
+            distributions.push_back(&cluster.distribution);
         }
-        den = log(den);
-        return den;
+        return evaluate_log_density(point, weights, distributions);
     }
 }
