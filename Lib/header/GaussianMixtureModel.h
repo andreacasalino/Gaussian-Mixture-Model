@@ -9,24 +9,22 @@
 
 #include <TrainSet.h>
 #include <GaussianDistribution.h>
-#include <components/DivergenceAware.h>
-#include <components/DrawSamplesCapable.h>
-#include <components/LogDensityAware.h>
 
 namespace gauss::gmm {
+	struct Cluster {
+		double weight;
+		GaussianDistribution distribution;
+	};
+
 	class GaussianMixtureModel : public DivergenceAware<GaussianMixtureModel>,
 								 public DrawSamplesCapable,
 								 public LogDensityAware {
 	public:
-		struct Cluster {
-			double weight;
-			GaussianDistribution distribution;
-		};
 		// weights are interally normalized
 		GaussianMixtureModel(const std::vector<Cluster>& clusters);
 
-		GaussianMixtureModel(const GaussianMixtureModel& o);
-		GaussianMixtureModel& operator=(const GaussianMixtureModel& o);
+		GaussianMixtureModel(const GaussianMixtureModel& o) = default;
+		GaussianMixtureModel& operator=(const GaussianMixtureModel& o) = delete;
 
 		GaussianMixtureModel(GaussianDistribution&& o) = delete;
 		GaussianMixtureModel& operator=(GaussianMixtureModel&& o) = delete;
@@ -52,11 +50,7 @@ namespace gauss::gmm {
 
 		double evaluateLogDensity(const Eigen::VectorXd& point) const override;
 
-		double evaluateKullbackLeiblerDivergence(
-			const GaussianMixtureModel& other) const override {
-			throw 0;
-			return 0.0;
-		};
+		void setMonteCarloTrials(const std::size_t trials) { monte_carlo_trials = trials; };
 
 		/** @brief Estimate the Kullback-Leibler divergence of this model w.r.t. the one passed as input.
 		 * Since the exact compuation is not possible, a Monte carlo approach is followed. The number of samples
@@ -65,7 +59,9 @@ namespace gauss::gmm {
 		 * @param[in] other the model for which the divergence w.r.t. this one must be estimated
 		 * @param[out] the divergence
 		 */
-		double getKullbackLeiblerDiergenceMonteCarlo(const GMM& other) const;
+		 // Monte Carlo
+		double evaluateKullbackLeiblerDivergence(
+			const GaussianMixtureModel& other) const override;
 
 		/** @brief Estimate the Kullback-Leibler divergence of this model w.r.t. the one passed as input.
 		 * Since the exact compuation is not possible, the upper and lower bound proposed in "LOWER AND UPPER BOUNDS FOR APPROXIMATION OF THE KULLBACK-LEIBLER
@@ -76,11 +72,12 @@ namespace gauss::gmm {
 			l id the lower bound of the divergence
 			b id the upper bound of the divergence
 		 */
-		std::pair<double, double> getKullbackLeiblerDiergenceEstimate(const GMM& other) const;
+		std::pair<double, double> estimateKullbackLeiblerDivergence(const GaussianMixtureModel& other) const;
 
 		const std::vector<Cluster>& getClusters() const { return clusters; };
 
 	private:
+		std::size_t monte_carlo_trials;
 		const std::vector<Cluster> clusters;
 	};
 }

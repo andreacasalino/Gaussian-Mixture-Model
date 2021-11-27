@@ -24,5 +24,5 @@ namespace gauss::gmm {
 		std::vector<std::size_t> initialLabeling = {};
 	};
 
-	std::vector<GaussianMixtureModel::Cluster> ExpectationMaximization(const TrainSet& train_set, const std::size_t& N_clusters, const TrainInfo& info = TrainInfo{}, double* likelihood = nullptr);
+	std::vector<Cluster> ExpectationMaximization(const TrainSet& train_set, const std::size_t& N_clusters, const TrainInfo& info = TrainInfo{}, double* likelihood = nullptr);
 }

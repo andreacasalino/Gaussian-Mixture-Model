@@ -59,7 +59,7 @@ namespace gauss::gmm {
 			for (kk = 0; kk < clusters.size(); ++kk ) {
 				clusters[kk].clear();
 			}
-			std::for_each(samplesList.begin(), samplesList.end(), [&](const V& v) {
+			std::for_each(samplesList.begin(), samplesList.end(), [&](const Eigen::VectorXd& v) {
 				pos_nearest = 0;
 				dist_min = (v - Means[0]).squaredNorm();
 				for (kk = 1; kk < N_cluster; ++kk) {

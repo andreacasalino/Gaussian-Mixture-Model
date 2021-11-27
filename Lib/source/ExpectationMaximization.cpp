@@ -43,17 +43,17 @@ namespace gauss::gmm {
 			std::unique_ptr<GaussianDistribution> distribution;
 		};
 
-		std::vector<GaussianMixtureModel::Cluster> convert(const std::vector<ClusterData>& clusters) {
-			std::vector<GaussianMixtureModel::Cluster> result;
+		std::vector<Cluster> convert(const std::vector<ClusterData>& clusters) {
+			std::vector<Cluster> result;
 			result.reserve(clusters.size());
 			for (const auto& cluster : clusters) {
-				result.push_back(GaussianMixtureModel::Cluster{ cluster.weight, *cluster.distribution});
+				result.push_back(Cluster{ cluster.weight, *cluster.distribution});
 			}
 			return result;
 		}
 	}
 
-	std::vector<GaussianMixtureModel::Cluster> ExpectationMaximization(const TrainSet& train_set, const std::size_t& N_clusters, const TrainInfo& info, double* likelihood) {
+	std::vector<Cluster> ExpectationMaximization(const TrainSet& train_set, const std::size_t& N_clusters, const TrainInfo& info, double* likelihood) {
 		if (0 == N_clusters) throw Error("Invalid number of clusters");
 		const auto& Samples = train_set.GetSamples();
 
