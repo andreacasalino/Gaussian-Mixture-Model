@@ -16,10 +16,10 @@ namespace gauss::gmm {
 	class TrainSet {
 	public:
 		TrainSet(const TrainSet& o) = default;
-		TrainSet& operator==(const TrainSet& o) = delete;
+		TrainSet& operator=(const TrainSet& o) = default;
 
 		TrainSet(TrainSet&& o) = delete;
-		TrainSet& operator==(TrainSet&& o) = delete;
+		TrainSet& operator=(TrainSet&& o) = delete;
 
 		/** @brief Import the training set from a textual file.
 		 * Every line of the file is a sample. Clearly, all the rows must have the same number of elements

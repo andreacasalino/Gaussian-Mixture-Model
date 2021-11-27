@@ -10,7 +10,7 @@
 #include <stdexcept>
 
 namespace gauss::gmm {
-    /** @brief A runtime error that can be raised when using any object in gmm::
+    /** @brief A runtime error that can be raised by objects in this namespace
      */
     class Error : public std::runtime_error {
     public:

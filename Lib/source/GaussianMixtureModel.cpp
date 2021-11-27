@@ -9,12 +9,38 @@
 
 #include <GaussianMixtureModel.h>
 #include <GaussianMixtureModelSampler.h>
+#include <Error.h>
 
 namespace gauss::gmm {
+    std::vector<GaussianMixtureModel::Cluster> check_and_make_clusters(const std::vector<GaussianMixtureModel::Cluster>& clusters) {
+        std::vector<GaussianMixtureModel::Cluster> result = clusters;
+        if (result.empty()) {
+            throw Error("Empy clusters for GaussianMixtureModel");
+        }
+        double weight_sum = 0.0;
+        std::size_t state_size = result.front().distribution.getMean().size();
+        for (const auto& cluster : result) {
+            if (cluster.weight < 0) {
+                throw Error("Negative weight for GaussianMixtureModel");
+            }
+            if (state_size != cluster.distribution.getMean().size()) {
+                throw Error("Invalid cluster set");
+            }
+            weight_sum += cluster.weight;
+        }
+        for (auto& cluster : result) {
+            cluster.weight *= 1.0 / weight_sum;
+        }
+        return result;
+    }
+    GaussianMixtureModel::GaussianMixtureModel(const std::vector<Cluster>& clusters)
+        : clusters(check_and_make_clusters(clusters)) {
+    }
+
     Eigen::VectorXd GaussianMixtureModel::Classify(const Eigen::VectorXd& point) const {
         Eigen::VectorXd result(clusters.size());
         for (Eigen::Index k = 0; k < result.size(); ++k) {
-            result(k) = exp(clusters[k].getWeightLog() + clusters[k].distribution->evaluateLogDensity(point));
+            result(k) = exp(log(clusters[k].weight) + clusters[k].distribution.evaluateLogDensity(point));
         }
         result *= (1.0 / result.sum());
         return result;
@@ -33,8 +59,8 @@ namespace gauss::gmm {
 
     double GaussianMixtureModel::evaluateLogDensity(const Eigen::VectorXd& point) const {
         double den = 0.0;
-        for (const auto& cluster : clusters) {
-            den += exp(cluster.getWeightLog() + cluster.distribution->evaluateLogDensity(point));
+        for (Eigen::Index k = 0; k < clusters.size(); ++k) {
+            den += exp(log(clusters[k].weight) + clusters[k].distribution.evaluateLogDensity(point));
         }
         den = log(den);
         return den;

@@ -18,24 +18,11 @@ namespace gauss::gmm {
 								 public DrawSamplesCapable,
 								 public LogDensityAware {
 	public:
-		class Cluster {
-		public:
-			Cluster(const double w, std::unique_ptr<const GaussianDistribution> distribution);
-
-			const double weight;
-			const std::unique_ptr<const GaussianDistribution> distribution;
-
-			inline double getWeightLog() const {
-				if (nullptr == weight_log) {
-					weight_log.reset(new double(log(weight)));
-				}
-				return *weight_log.get();
-			}
-
-
-		private:
-			mutable std::unique_ptr<double> weight_log;
+		struct Cluster {
+			double weight;
+			GaussianDistribution distribution;
 		};
+		// weights are interally normalized
 		GaussianMixtureModel(const std::vector<Cluster>& clusters);
 
 		/** @brief The GMM is be built using the passed train set using the expectation maximization algorithm.
