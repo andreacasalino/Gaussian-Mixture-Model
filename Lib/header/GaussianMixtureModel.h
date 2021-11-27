@@ -25,21 +25,20 @@ namespace gauss::gmm {
 		// weights are interally normalized
 		GaussianMixtureModel(const std::vector<Cluster>& clusters);
 
-		/** @brief The GMM is be built using the passed train set using the expectation maximization algorithm.
-		 * The initial guess used to cluster the samples, might be obtained using the K means or directly specified, according
-		 * to the values put in TrainInfo.
-		 * @param[in] the number of clusters to consider for training
-		 * @param[in] the training set to use
-		 * @param[in] the information used by the training process
+		GaussianMixtureModel(const GaussianMixtureModel& o);
+		GaussianMixtureModel& operator=(const GaussianMixtureModel& o);
+
+		GaussianMixtureModel(GaussianDistribution&& o) = delete;
+		GaussianMixtureModel& operator=(GaussianMixtureModel&& o) = delete;
+
+		/** @brief Use this method to fit a GMM with an unknown number of clusters.
+		 * Training is done for every possible number of clusters in N_clusters_to_try and the solution maximising the likelyhood of the training set is selected.
+		 * @param[out] return the GMM model maximising the training set
+		 * @param[in] the training set to assume
+		 * @param[in] the number of clusters to try
+		 * @param[in] the maximum number of iterations to assume for the expectation maximization (the algorithm can reach a convergence also before)
 		 */
-		struct TrainInfo {
-			// The maximum number of iterations considered by the expectation maximization algorithm.
-			std::size_t maxIterations = 1000;
-			// when passed empty is ingored and the K means is used for building the initial guess
-			std::vector<std::size_t> initialLabeling = {};
-		};
-		// not really sure it should be placed here
-		GaussianMixtureModel(const std::size_t& N_clusters, const TrainSet& train_set, const TrainInfo& info = TrainInfo());
+		static std::unique_ptr<GaussianMixtureModel> fitOptimalModel(const TrainSet& train_set, const std::vector<std::size_t>& N_clusters_to_try, const std::size_t& Iterations = 1000);
 
 		/** @brief Perform classification of a specified input.
 		 * Numbers in the vector returned are the probabilities that X is coming from the corresponding cluster in the model.
@@ -84,15 +83,4 @@ namespace gauss::gmm {
 	private:
 		const std::vector<Cluster> clusters;
 	};
-
-
-	/** @brief Use this method to fit a GMM with an unknown number of clusters.
-	 * Training is done for every possible number of clusters in N_clusters_to_try and the solution maximising the likelyhood of the training set is selected.
-	 * @param[out] return the GMM model maximising the training set
-	 * @param[in] the training set to assume
-	 * @param[in] the number of clusters to try
-	 * @param[in] the maximum number of iterations to assume for the expectation maximization (the algorithm can reach a convergence also before)
-	 */
-	std::unique_ptr<GaussianMixtureModel> fitOptimalModel(const TrainSet& train_set, const std::vector<std::size_t>& N_clusters_to_try, const std::size_t& Iterations = 1000);
-
 }

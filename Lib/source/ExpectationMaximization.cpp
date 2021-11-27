@@ -7,20 +7,16 @@
 
 #pragma once
 
-#include "ExpectationMaximization.h"
+#include <ExpectationMaximization.h>
 #include "EvaluateLogDensity.h"
 #include <Utils.h>
 #include <algorithm>
 #include <limits>
 #include <KMeans.h>
 
-//#include <header/GMM.h>
-//#include "Commons.h"
-//#include <memory>
-
 namespace gauss::gmm {
 	namespace {
-		std::unique_ptr<std::vector<std::list<const Eigen::VectorXd*>>> validateInitialLabeling(const std::size_t& N_clusters, const std::vector<Eigen::VectorXd>& Samples, const GaussianMixtureModel::TrainInfo& info) {
+		std::unique_ptr<std::vector<std::list<const Eigen::VectorXd*>>> validateInitialLabeling(const std::size_t& N_clusters, const std::vector<Eigen::VectorXd>& Samples, const TrainInfo& info) {
 			if (info.initialLabeling.empty()) return nullptr;
 			if (info.initialLabeling.size() != Samples.size()) throw Error("Inconsistent number of labels for the passed initial guess");
 			std::unique_ptr<std::vector<std::list<const Eigen::VectorXd*>>> clusters = std::make_unique<std::vector<std::list<const Eigen::VectorXd*>>>();
@@ -57,7 +53,7 @@ namespace gauss::gmm {
 		}
 	}
 
-	std::vector<GaussianMixtureModel::Cluster> ExpectationMaximization(const TrainSet& train_set, const std::size_t& N_clusters, const GaussianMixtureModel::TrainInfo& info, double& likelihood) {
+	std::vector<GaussianMixtureModel::Cluster> ExpectationMaximization(const TrainSet& train_set, const std::size_t& N_clusters, const TrainInfo& info, double* likelihood) {
 		if (0 == N_clusters) throw Error("Invalid number of clusters");
 		const auto& Samples = train_set.GetSamples();
 
@@ -161,7 +157,9 @@ namespace gauss::gmm {
 			}
 			old_lkl = new_lkl;
 		}
-		likelihood = old_lkl;
+		if (nullptr != likelihood) {
+			*likelihood = old_lkl;
+		}
 		return convert(clusters);
 	}
 }

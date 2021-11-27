@@ -11,6 +11,7 @@
 #include <GaussianMixtureModelSampler.h>
 #include <Error.h>
 #include "EvaluateLogDensity.h"
+#include <ExpectationMaximization.h>
 
 namespace gauss::gmm {
     std::vector<GaussianMixtureModel::Cluster> check_and_make_clusters(const std::vector<GaussianMixtureModel::Cluster>& clusters) {
@@ -36,6 +37,28 @@ namespace gauss::gmm {
     }
     GaussianMixtureModel::GaussianMixtureModel(const std::vector<Cluster>& clusters)
         : clusters(check_and_make_clusters(clusters)) {
+    }
+
+    std::unique_ptr<GaussianMixtureModel> GaussianMixtureModel::fitOptimalModel(const TrainSet& train_set, const std::vector<std::size_t>& N_clusters_to_try, const std::size_t& Iterations) {
+        if (N_clusters_to_try.empty()) {
+            throw Error("No clusters to try");
+        }
+        TrainInfo info;
+        info.maxIterations = Iterations;
+
+        double best_likelihood;
+        std::unique_ptr<std::vector<GaussianMixtureModel::Cluster>> best_model =
+            std::make_unique<std::vector<GaussianMixtureModel::Cluster>>(ExpectationMaximization(train_set, N_clusters_to_try.front(), info, &best_likelihood));
+        for (std::size_t k = 1; k < N_clusters_to_try.size(); ++k) {
+            double att_likelihood;
+            std::unique_ptr<std::vector<GaussianMixtureModel::Cluster>> att_model =
+                std::make_unique<std::vector<GaussianMixtureModel::Cluster>>(ExpectationMaximization(train_set, N_clusters_to_try.front(), info, &att_likelihood));
+            if (att_likelihood > best_likelihood) {
+                best_likelihood = att_likelihood;
+                best_model = std::move(att_model);
+            }
+        }
+        return std::make_unique<GaussianMixtureModel>(*best_model);
     }
 
     Eigen::VectorXd GaussianMixtureModel::Classify(const Eigen::VectorXd& point) const {
