@@ -40,9 +40,9 @@ TEST(Sampling, 3d) {
         clusters.reserve(3);
         clusters.emplace_back(1, gauss::GaussianDistribution(gauss::test::make_vector({ 1, -1 }),
             gauss::test::make_matrix({ {0.1, 0}, {0, 0.2} })));
-        clusters.emplace_back(-3, gauss::GaussianDistribution(gauss::test::make_vector({ 0, 0 }),
+        clusters.emplace_back(3, gauss::GaussianDistribution(gauss::test::make_vector({ 0, 0 }),
             gauss::test::make_matrix({ {0.3, 0}, {0, 0.3} })));
-        clusters.emplace_back(-2, gauss::GaussianDistribution(gauss::test::make_vector({ -1, 1 }),
+        clusters.emplace_back(2, gauss::GaussianDistribution(gauss::test::make_vector({ -1, 1 }),
             gauss::test::make_matrix({ {0.2, 0}, {0, 0.1} })));
     }
 

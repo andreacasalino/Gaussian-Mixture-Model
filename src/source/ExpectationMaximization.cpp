@@ -54,7 +54,9 @@ namespace gauss::gmm {
 	}
 
 	std::vector<Cluster> ExpectationMaximization(const TrainSet& train_set, const std::size_t& N_clusters, const TrainInfo& info, double* likelihood) {
-		if (0 == N_clusters) throw Error("Invalid number of clusters");
+		if (0 == N_clusters) {
+			throw Error("Invalid number of clusters");
+		}
 		const auto& Samples = train_set.GetSamples();
 
 		auto initialGuess = validateInitialLabeling(N_clusters, Samples, info);
@@ -102,11 +104,13 @@ namespace gauss::gmm {
 				++it_c;
 			}
 
-			for (r = 0; r < R; ++r)
+			for (r = 0; r < R; ++r) {
 				gamma.row(r) = (1.f / gamma.row(r).sum()) * gamma.row(r);
+			}
 
-			for (c = 0; c < C; ++c)
+			for (c = 0; c < C; ++c) {
 				n(c) = gamma.col(c).sum();
+			}
 
 			c = 0;
 			for (it_c = clusters.begin(); it_c != clusters.end(); ++it_c) {

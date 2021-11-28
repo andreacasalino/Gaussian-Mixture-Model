@@ -4,6 +4,8 @@
 
 constexpr double BIG_RAY = 20;
 constexpr std::size_t SAMPLES_X_CLUSTER = 50;
+constexpr double SMALL_RAY = 2;
+static const double SCALE_COEFF = 0.8 * SMALL_RAY / sqrt(2.0);
 gauss::TrainSet make_samples(const std::size_t clusters) {
     std::vector<Eigen::VectorXd> centers;
     centers.reserve(clusters);
@@ -21,13 +23,13 @@ gauss::TrainSet make_samples(const std::size_t clusters) {
         for(std::size_t c = 0; c < clusters; ++c) {
             samples.emplace_back(2);
             samples.back().setRandom();
+            samples.back() *= SCALE_COEFF;
             samples.back() += centers[c];
         }
     }
     return gauss::TrainSet{ samples };
 };
 
-constexpr double SMALL_RAY = 2;
 void check_classification(const std::vector<std::list<const Eigen::VectorXd*>>& clusters) {
     for (const auto& cluster : clusters) {
         auto mean = gauss::computeMean(cluster, [](const auto* sample) { return *sample; });
@@ -50,10 +52,6 @@ TEST(kMeans, three_clusters) {
 
 TEST(kMeans, four_clusters) {
     make_samples_and_check_classification(4);
-}
-
-TEST(kMeans, five_clusters) {
-    make_samples_and_check_classification(5);
 }
 
 int main(int argc, char *argv[]) {
