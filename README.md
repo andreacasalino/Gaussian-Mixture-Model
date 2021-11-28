@@ -8,6 +8,6 @@ Otherwise, when non specifying anything, the [**k-means**](https://en.wikipedia.
 
 This package is completely **cross-platform**: use [CMake](https://cmake.org) to configure the project containig the libary and some samples.
 
-This library uses [**Eigen**](http://eigen.tuxfamily.org/index.php?title=Main_Page) as linear algebra engine. 
-However **Eigen** does not come with this libary: you have to externally download it and set the CMake option variable **EIGEN3_FOLDER** equal to
-the folder where you put **Eigen**. You can easily use the Cmake [GUI](https://www.youtube.com/watch?v=LxHV-KNEG3k&t=1s) for doing that.
+This library uses [**Eigen**](https://gitlab.com/libeigen/eigen) as internal linear algebra engine. 
+**Eigen** is by default [fetched](https://cmake.org/cmake/help/latest/module/FetchContent.html) and copied by **CMake** from the latest version on the official **Eigen** repository.
+However, you can also use a local version, by [setting](https://www.youtube.com/watch?v=LxHV-KNEG3k&t=1s) the **CMake** option **EIGEN_INSTALL_FOLDER** equal to the root folder storing the local **Eigen** you want to use.
