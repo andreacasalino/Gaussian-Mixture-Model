@@ -4,7 +4,7 @@
 
 constexpr double BIG_RAY = 20;
 constexpr std::size_t SAMPLES_X_CLUSTER = 50;
-gauss::gmm::TrainSet make_samples(const std::size_t clusters) {
+gauss::TrainSet make_samples(const std::size_t clusters) {
     std::vector<Eigen::VectorXd> centers;
     centers.reserve(clusters);
     double angle = 0.0;
@@ -24,7 +24,7 @@ gauss::gmm::TrainSet make_samples(const std::size_t clusters) {
             samples.back() += centers[c];
         }
     }
-    return gauss::gmm::TrainSet{ samples };
+    return gauss::TrainSet{ samples };
 };
 
 constexpr double SMALL_RAY = 2;

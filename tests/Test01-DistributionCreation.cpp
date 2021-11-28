@@ -2,6 +2,7 @@
 #include <gtest/gtest.h>
 
 #include <GaussianMixtureModel/GaussianMixtureModel.h>
+#include <GaussianMixtureModel/Error.h>
 
 TEST(DistributionCreation, postive_tests) {
     {

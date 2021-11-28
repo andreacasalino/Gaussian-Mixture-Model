@@ -7,7 +7,6 @@
 
 #pragma once
 
-#include <GaussianMixtureModel/TrainSet.h>
 #include <GaussianUtils/GaussianDistribution.h>
 
 namespace gauss::gmm {
