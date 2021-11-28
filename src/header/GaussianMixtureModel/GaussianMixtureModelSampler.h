@@ -11,9 +11,12 @@
 #include <GaussianMixtureModel/GaussianMixtureModel.h>
 
 namespace gauss::gmm {
-    class GaussianMixtureModelSampler {
+    class GaussianMixtureModelSampler
+        : public StateSpaceSizeAware {
     public:
         GaussianMixtureModelSampler(const GaussianMixtureModel& distribution);
+
+        std::size_t getStateSpaceSize() const override { return clusters_samplers.front().getStateSpaceSize(); }
 
         Eigen::VectorXd getSample() const;
 

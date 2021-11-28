@@ -12,7 +12,7 @@
 
 namespace gauss::gmm {
 	struct Cluster {
-		Cluster(const double w, GaussianDistribution distribution) 
+		Cluster(const double w, const GaussianDistribution& distribution) 
 			: weight(w)
 			, distribution(distribution) {};
 
@@ -22,16 +22,19 @@ namespace gauss::gmm {
 
 	class GaussianMixtureModel : public DivergenceAware<GaussianMixtureModel>,
 								 public DrawSamplesCapable,
-								 public LogDensityAware {
+								 public LogDensityAware,
+								 public StateSpaceSizeAware {
 	public:
 		// weights are interally normalized
 		GaussianMixtureModel(const std::vector<Cluster>& clusters);
 
 		GaussianMixtureModel(const GaussianMixtureModel& o) = default;
-		GaussianMixtureModel& operator=(const GaussianMixtureModel& o) = delete;
+		GaussianMixtureModel& operator=(const GaussianMixtureModel& o) = default;
 
-		GaussianMixtureModel(GaussianDistribution&& o) = delete;
-		GaussianMixtureModel& operator=(GaussianMixtureModel&& o) = delete;
+		GaussianMixtureModel(GaussianMixtureModel&& o) = default;
+		GaussianMixtureModel& operator=(GaussianMixtureModel&& o) = default;
+
+		std::size_t getStateSpaceSize() const override { return clusters.front().distribution.getStateSpaceSize(); }
 
 		/** @brief Use this method to fit a GMM with an unknown number of clusters.
 		 * Training is done for every possible number of clusters in N_clusters_to_try and the solution maximising the likelyhood of the training set is selected.

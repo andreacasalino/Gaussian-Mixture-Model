@@ -12,9 +12,12 @@
 
 namespace gauss::gmm {
     class GaussianMixtureModelFactory
-        : public RandomModelFactory<GaussianMixtureModel> {
+        : public RandomModelFactory<GaussianMixtureModel>
+        , public StateSpaceSizeAware {
     public:
         GaussianMixtureModelFactory(const std::size_t model_size, const std::size_t clusters);
+
+        std::size_t getStateSpaceSize() const override { return cluster_factory.getStateSpaceSize(); }
 
         std::unique_ptr<GaussianMixtureModel> makeRandomModel() const override;
 
