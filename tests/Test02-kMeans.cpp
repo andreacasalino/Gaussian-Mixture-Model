@@ -1,119 +1,60 @@
-#include <GaussianUtils/GaussianDistribution.h>
-#include <Packer.h>
-#include <TestSampler.h>
+#include <GaussianMixtureModel/KMeans.h>
 #include <GaussianUtils/Utils.h>
 #include <gtest/gtest.h>
-#include <random>
 
-constexpr double TOLL = 0.001;
-#define EXPECT_SIMILAR(VAL_A, VAL_B) EXPECT_LE(abs(VAL_A - VAL_B), TOLL)
+constexpr double BIG_RAY = 20;
+constexpr std::size_t SAMPLES_X_CLUSTER = 50;
+gauss::gmm::TrainSet make_samples(const std::size_t clusters) {
+    std::vector<Eigen::VectorXd> centers;
+    centers.reserve(clusters);
+    double angle = 0.0;
+    double angle_delta = gauss::PI_GREEK * 2.0 / static_cast<double>(clusters);
+    for (std::size_t c = 0; c < clusters; ++c) {
+        centers.emplace_back(2);
+        centers.back()(0) = BIG_RAY * cos(angle);
+        centers.back()(1) = BIG_RAY * sin(angle);
+        angle += angle_delta;
+    }
+    std::vector<Eigen::VectorXd> samples;
+    samples.reserve(SAMPLES_X_CLUSTER * clusters);
+    for (std::size_t s = 0; s < SAMPLES_X_CLUSTER; ++s) {
+        for(std::size_t c = 0; c < clusters; ++c) {
+            samples.emplace_back(2);
+            samples.back().setRandom();
+            samples.back() += centers[c];
+        }
+    }
+    return gauss::gmm::TrainSet{ samples };
+};
 
-constexpr std::size_t TRIALS = 20;
+constexpr double SMALL_RAY = 2;
+void check_classification(const std::vector<std::list<const Eigen::VectorXd*>>& clusters) {
+    for (const auto& cluster : clusters) {
+        auto mean = gauss::computeMean(cluster, [](const auto* sample) { return *sample; });
+        for (const Eigen::VectorXd* sample : cluster) {
+            EXPECT_LE(Eigen::VectorXd(*sample - mean).norm(), SMALL_RAY);
+        }
+    }
+};
 
-double eval_log_density_1d(const double mean, const double sigma,
-                           const double point) {
-  return -0.5 * log(2.0 * gauss::PI_GREEK * sigma) -
-         0.5 * pow(point - mean, 2) / sigma;
+void make_samples_and_check_classification(const std::size_t clusters) {
+    auto samples = make_samples(clusters);
+    std::vector<std::list<const Eigen::VectorXd*>> result;
+    gauss::gmm::kMeansClustering(result, samples, clusters);
+    check_classification(result);
 }
 
-TEST(PdfEvaluation, 1d) {
-  double mean = 0.0;
-  double sigma = 1.0;
-
-  {
-    gauss::GaussianDistribution distribution(
-        gauss::test::make_vector({mean}), gauss::test::make_vector({{sigma}}));
-    for (int k = 0; k < TRIALS; ++k) {
-      const auto sample = gauss::test::make_sample(1, 5.0);
-      EXPECT_SIMILAR(distribution.evaluateLogDensity(sample),
-                     eval_log_density_1d(mean, sigma, sample(0)));
-    }
-  }
-
-  mean = 1.0;
-  {
-    gauss::GaussianDistribution distribution(
-        gauss::test::make_vector({mean}), gauss::test::make_vector({{sigma}}));
-    for (int k = 0; k < TRIALS; ++k) {
-      const auto sample = gauss::test::make_sample(1, 5.0);
-      EXPECT_SIMILAR(distribution.evaluateLogDensity(sample),
-                     eval_log_density_1d(mean, sigma, sample(0)));
-    }
-  }
-
-  mean = -1.0;
-  {
-    gauss::GaussianDistribution distribution(
-        gauss::test::make_vector({mean}), gauss::test::make_vector({{sigma}}));
-    for (int k = 0; k < TRIALS; ++k) {
-      const auto sample = gauss::test::make_sample(1, 5.0);
-      EXPECT_SIMILAR(distribution.evaluateLogDensity(sample),
-                     eval_log_density_1d(mean, sigma, sample(0)));
-    }
-  }
-
-  mean = 1.3;
-  sigma = 0.2;
-  {
-    gauss::GaussianDistribution distribution(
-        gauss::test::make_vector({mean}), gauss::test::make_vector({{sigma}}));
-    for (int k = 0; k < TRIALS; ++k) {
-      const auto sample = gauss::test::make_sample(1, 5.0);
-      EXPECT_SIMILAR(distribution.evaluateLogDensity(sample),
-                     eval_log_density_1d(mean, sigma, sample(0)));
-    }
-  }
+TEST(kMeans, three_clusters) {
+    make_samples_and_check_classification(3);
 }
 
-double eval_log_density_nd(const Eigen::VectorXd& mean, const Eigen::VectorXd& sigma, const Eigen::VectorXd& point) {
-    double result = 0.0;
-    for (Eigen::Index i = 0; i < mean.size(); ++i) {
-        result += eval_log_density_1d(mean(i), sigma(i), point(i));
-    }
-    return result;
+TEST(kMeans, four_clusters) {
+    make_samples_and_check_classification(4);
 }
 
-void make_positive(Eigen::VectorXd& sigma) {
-    for (Eigen::Index i = 0; i < sigma.size(); ++i) {
-        sigma(i) = abs(sigma(i));
-    }
+TEST(kMeans, five_clusters) {
+    make_samples_and_check_classification(5);
 }
-
-Eigen::MatrixXd make_diagonal_covariance(Eigen::VectorXd sigma) {
-    Eigen::MatrixXd covariance(sigma.size(), sigma.size());
-    covariance.setZero();
-    for (Eigen::Index i = 0; i < sigma.size(); ++i) {
-        covariance(i, i) = sigma(i);
-    }
-    return covariance;
-}
-
-TEST(PdfEvaluation, 2d) {
-    auto mean = gauss::test::make_sample(2, 3.0);
-    auto sigma = gauss::test::make_sample(2, 3.0);
-    make_positive(sigma);
-
-    gauss::GaussianDistribution distribution(mean, make_diagonal_covariance(sigma));
-    for (int k = 0; k < TRIALS; ++k) {
-        const auto sample = gauss::test::make_sample(2, 5.0);
-        EXPECT_SIMILAR(distribution.evaluateLogDensity(sample),
-            eval_log_density_nd(mean, sigma, sample));
-    }
-}
-
-TEST(PdfEvaluation, 6d) {
-    auto mean = gauss::test::make_sample(6, 3.0);
-    auto sigma = gauss::test::make_sample(6, 3.0);
-    make_positive(sigma);
-
-    gauss::GaussianDistribution distribution(mean, make_diagonal_covariance(sigma));
-    for (int k = 0; k < TRIALS; ++k) {
-        const auto sample = gauss::test::make_sample(6, 5.0);
-        EXPECT_SIMILAR(distribution.evaluateLogDensity(sample),
-            eval_log_density_nd(mean, sigma, sample));
-    }
-}
-
 
 int main(int argc, char *argv[]) {
   ::testing::InitGoogleTest(&argc, argv);
