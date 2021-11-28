@@ -12,6 +12,7 @@
 #include <GaussianMixtureModel/Error.h>
 #include "EvaluateLogDensity.h"
 #include <GaussianMixtureModel/ExpectationMaximization.h>
+#include <Eigen/Dense>
 
 namespace gauss::gmm {
     namespace {
@@ -118,7 +119,7 @@ namespace gauss::gmm {
             S += g.distribution.getCovariance();
             temp -= log(S.determinant());
             Eigen::VectorXd Delta = g.distribution.getMean() - f.distribution.getMean();
-            temp -= Delta.transpose() * S.inverse() * Delta;
+            temp -= Delta.transpose() * computeCovarianceInvert(S) * Delta;
             temp *= 0.5;
             return exp(temp);
         }

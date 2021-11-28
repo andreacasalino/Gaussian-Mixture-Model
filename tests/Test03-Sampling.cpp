@@ -3,7 +3,7 @@
 #include <Packer.h>
 #include <gtest/gtest.h>
 
-constexpr std::size_t SAMPLES = 100000;
+constexpr std::size_t SAMPLES = 3000;
 
 constexpr double TOLL = 0.025;
 #define EXPECT_SIMILAR(VAL_A, VAL_B) EXPECT_LE(abs(VAL_A - VAL_B), TOLL)
@@ -36,23 +36,23 @@ void expect_similar(const std::vector<gauss::gmm::Cluster>& a, const std::vector
 
 TEST(Sampling, 3d) {
     std::vector<gauss::gmm::Cluster> clusters;
-    {        
+    {
         clusters.reserve(3);
         clusters.emplace_back(1, gauss::GaussianDistribution(gauss::test::make_vector({ 1, -1 }),
-            gauss::test::make_matrix({ {0.1, 0}, {0, 0.2} })));
+            gauss::test::make_matrix({ {0.25, 0}, {0, 0.2} })));
         clusters.emplace_back(3, gauss::GaussianDistribution(gauss::test::make_vector({ 0, 0 }),
-            gauss::test::make_matrix({ {0.3, 0}, {0, 0.3} })));
+            gauss::test::make_matrix({ {0.25, 0}, {0, 0.3} })));
         clusters.emplace_back(2, gauss::GaussianDistribution(gauss::test::make_vector({ -1, 1 }),
-            gauss::test::make_matrix({ {0.2, 0}, {0, 0.1} })));
+            gauss::test::make_matrix({ {0.5, 0}, {0, 0.1} })));
     }
 
-  auto samples = gauss::gmm::GaussianMixtureModel(clusters).drawSamples(SAMPLES);
+    auto samples = gauss::gmm::GaussianMixtureModel(clusters).drawSamples(SAMPLES);
 
-  auto learnt_clusters = gauss::gmm::ExpectationMaximization(samples, clusters.size());
-  expect_similar(clusters, learnt_clusters);
+    auto learnt_clusters = gauss::gmm::ExpectationMaximization(samples, clusters.size());
+    expect_similar(clusters, learnt_clusters);
 
-  gauss::gmm::GaussianMixtureModel learnt_model(learnt_clusters);
-  expect_similar(clusters, learnt_model.getClusters());
+    gauss::gmm::GaussianMixtureModel learnt_model(learnt_clusters);
+    expect_similar(clusters, learnt_model.getClusters());
 }
 
 TEST(Sampling, 6d) {
