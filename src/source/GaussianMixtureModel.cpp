@@ -13,32 +13,53 @@
 #include <GaussianMixtureModel/GaussianMixtureModelSampler.h>
 
 namespace gauss::gmm {
-namespace {
-std::vector<Cluster>
-check_and_make_clusters(const std::vector<Cluster> &clusters) {
-  std::vector<Cluster> result = clusters;
-  if (result.empty()) {
-    throw Error("Empy clusters for GaussianMixtureModel");
-  }
-  double weight_sum = 0.0;
-  std::size_t state_size = result.front().distribution.getMean().size();
-  for (const auto &cluster : result) {
-    if (cluster.weight < 0) {
-      throw Error("Negative weight for GaussianMixtureModel");
+void GaussianMixtureModel::addCluster(const double weight, const gauss::GaussianDistribution& distribution) {
+    if (weight < 0) {
+        throw Error("Negative weight for GaussianMixtureModel");
     }
-    if (state_size != cluster.distribution.getMean().size()) {
-      throw Error("Invalid cluster set");
+    if (!clusters.empty() && (getStateSpaceSize() != distribution.getStateSpaceSize())) {
+        throw Error("Invalid new cluster: state space size mismatch");
     }
-    weight_sum += cluster.weight;
-  }
-  for (auto &cluster : result) {
-    cluster.weight *= 1.0 / weight_sum;
-  }
-  return result;
+    original_clusters_weights.push_back(weight);
+    clusters.emplace_back();
+    clusters.back().weight = weight;
+    clusters.back().distribution = std::make_unique<GaussianDistribution>(distribution);
+    // normalize weigths
+    double sum = 0.0;
+    for (const auto& w : original_clusters_weights) {
+        sum += w;
+    }
+    for (std::size_t k = 0; k < clusters.size(); ++k) {
+        clusters[k].weight = original_clusters_weights[k] / sum;
+    }
 }
-} // namespace
-GaussianMixtureModel::GaussianMixtureModel(const std::vector<Cluster> &clusters)
-    : clusters(check_and_make_clusters(clusters)) {}
+
+GaussianMixtureModel::GaussianMixtureModel(const double weight, const gauss::GaussianDistribution& distribution) {
+    addCluster(weight, distribution);
+}
+
+GaussianMixtureModel::GaussianMixtureModel(const std::vector<Cluster> &clusters) {
+    if (clusters.empty()) {
+        throw Error("Empy clusters for GaussianMixtureModel");
+    }
+    for (const auto& cluster : clusters) {
+        addCluster(cluster.weight, *cluster.distribution);
+    }
+}
+
+GaussianMixtureModel::GaussianMixtureModel(const GaussianMixtureModel& o) {
+    *this = o;
+}
+
+GaussianMixtureModel& GaussianMixtureModel::operator=(const GaussianMixtureModel& o) {
+    this->monte_carlo_trials = o.monte_carlo_trials;
+    this->original_clusters_weights.clear();
+    this->clusters.clear();
+    for (const auto & cluster : o.getClusters()) {
+        this->addCluster(cluster.weight, *cluster.distribution);
+    }
+    return *this;
+}
 
 std::unique_ptr<GaussianMixtureModel> GaussianMixtureModel::fitOptimalModel(
     const TrainSet &train_set,
@@ -72,7 +93,7 @@ GaussianMixtureModel::Classify(const Eigen::VectorXd &point) const {
   Eigen::VectorXd result(clusters.size());
   for (Eigen::Index k = 0; k < result.size(); ++k) {
     result(k) = exp(log(clusters[k].weight) +
-                    clusters[k].distribution.evaluateLogDensity(point));
+                    clusters[k].distribution->evaluateLogDensity(point));
   }
   result *= (1.0 / result.sum());
   return result;
@@ -97,15 +118,14 @@ GaussianMixtureModel::evaluateLogDensity(const Eigen::VectorXd &point) const {
   distributions.reserve(clusters.size());
   for (const auto &cluster : clusters) {
     weights.push_back(cluster.weight);
-    distributions.push_back(&cluster.distribution);
+    distributions.push_back(cluster.distribution.get());
   }
   return evaluate_log_density(point, weights, distributions);
 }
 
 double GaussianMixtureModel::evaluateKullbackLeiblerDivergence(
     const GaussianMixtureModel &other) const {
-  if (clusters.front().distribution.getMean().size() !=
-      other.getClusters().front().distribution.getMean().size()) {
+  if (getStateSpaceSize() != other.getStateSpaceSize()) {
     throw Error("The 2 GaussianMixtureModel are not comparable");
   }
   auto samples = drawSamples(monte_carlo_trials);
@@ -121,11 +141,11 @@ double GaussianMixtureModel::evaluateKullbackLeiblerDivergence(
 
 namespace {
 double tOperator(const Cluster &f, const Cluster &g) {
-  double temp = -f.distribution.getMean().size() * log(2.0 * PI_GREEK);
-  Eigen::MatrixXd S = f.distribution.getCovariance();
-  S += g.distribution.getCovariance();
+  double temp = -f.distribution->getMean().size() * log(2.0 * PI_GREEK);
+  Eigen::MatrixXd S = f.distribution->getCovariance();
+  S += g.distribution->getCovariance();
   temp -= log(S.determinant());
-  Eigen::VectorXd Delta = g.distribution.getMean() - f.distribution.getMean();
+  Eigen::VectorXd Delta = g.distribution->getMean() - f.distribution->getMean();
   temp -= Delta.transpose() * computeCovarianceInvert(S) * Delta;
   temp *= 0.5;
   return exp(temp);
@@ -135,10 +155,9 @@ double tOperator(const Cluster &f, const Cluster &g) {
 std::pair<double, double>
 GaussianMixtureModel::estimateKullbackLeiblerDivergence(
     const GaussianMixtureModel &other) const {
-  if (clusters.front().distribution.getMean().size() !=
-      other.getClusters().front().distribution.getMean().size()) {
-    throw Error("The 2 GaussianMixtureModel are not comparable");
-  }
+    if (getStateSpaceSize() != other.getStateSpaceSize()) {
+        throw Error("The 2 GaussianMixtureModel are not comparable");
+    }
   Eigen::MatrixXd Divergences(clusters.size(), other.clusters.size());
   Eigen::MatrixXd t(clusters.size(), other.clusters.size());
   Eigen::MatrixXd z(clusters.size(), clusters.size());
@@ -146,8 +165,8 @@ GaussianMixtureModel::estimateKullbackLeiblerDivergence(
   for (a = 0; a < A; ++a) {
     for (b = 0; b < B; ++b) {
       Divergences(a, b) =
-          clusters[a].distribution.evaluateKullbackLeiblerDivergence(
-              other.clusters[b].distribution);
+          clusters[a].distribution->evaluateKullbackLeiblerDivergence(
+              *other.clusters[b].distribution);
       t(a, b) = tOperator(clusters[a], other.clusters[b]);
     }
   }
@@ -184,8 +203,8 @@ GaussianMixtureModel::estimateKullbackLeiblerDivergence(
 
     temp += clusters[a].weight * 0.5 *
             log(pow(2.f * PI_GREEK * 2.71828,
-                    (double)clusters[a].distribution.getMean().size()) *
-                abs(clusters[a].distribution.getCovarianceDeterminant()));
+                    (double)clusters[a].distribution->getMean().size()) *
+                abs(clusters[a].distribution->getCovarianceDeterminant()));
   }
 
   bound.second += temp;

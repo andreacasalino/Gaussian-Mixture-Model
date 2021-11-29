@@ -57,7 +57,9 @@ std::vector<Cluster> convert(const std::vector<ClusterData> &clusters) {
   std::vector<Cluster> result;
   result.reserve(clusters.size());
   for (const auto &cluster : clusters) {
-    result.push_back(Cluster{cluster.weight, *cluster.distribution});
+      result.emplace_back();
+      result.back().weight = cluster.weight;
+      result.back().distribution = std::make_unique<GaussianDistribution>(*cluster.distribution);
   }
   return result;
 }

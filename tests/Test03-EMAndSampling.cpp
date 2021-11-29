@@ -30,9 +30,9 @@ void expect_similar(const Eigen::MatrixXd &cov_a,
 void expect_similar(const gauss::gmm::Cluster &a,
                     const gauss::gmm::Cluster &b) {
   EXPECT_SIMILAR(a.weight, b.weight, 0.1);
-  expect_similar(a.distribution.getMean(), b.distribution.getMean());
-  expect_similar(a.distribution.getCovariance(),
-                 b.distribution.getCovariance());
+  expect_similar(a.distribution->getMean(), b.distribution->getMean());
+  expect_similar(a.distribution->getCovariance(),
+                 b.distribution->getCovariance());
 }
 
 const gauss::gmm::Cluster *
@@ -41,12 +41,12 @@ get_closest(const gauss::gmm::Cluster &a,
   auto it = remaining.begin();
   const gauss::gmm::Cluster *closest = *it;
   double min_distance =
-      Eigen::VectorXd(a.distribution.getMean() - (*it)->distribution.getMean())
+      Eigen::VectorXd(a.distribution->getMean() - (*it)->distribution->getMean())
           .norm();
   ++it;
   for (it; it != remaining.end(); ++it) {
-    double att_distance = Eigen::VectorXd(a.distribution.getMean() -
-                                          (*it)->distribution.getMean())
+    double att_distance = Eigen::VectorXd(a.distribution->getMean() -
+                                          (*it)->distribution->getMean())
                               .norm();
     if (att_distance < min_distance) {
       closest = *it;
@@ -69,6 +69,12 @@ void expect_similar(const std::vector<gauss::gmm::Cluster> &a,
   }
 }
 
+void emplace_back(std::vector<gauss::gmm::Cluster>& clusters, const double w, const Eigen::VectorXd& mean, const Eigen::MatrixXd& covariance) {
+    clusters.emplace_back();
+    clusters.back().weight = w;
+    clusters.back().distribution = std::make_unique<gauss::GaussianDistribution>(mean, covariance);
+}
+
 TEST(Sampling, 3d) {
   std::vector<gauss::gmm::Cluster> clusters;
   {
@@ -76,17 +82,14 @@ TEST(Sampling, 3d) {
     eigs_cov << 0.1, 0.2;
     clusters.reserve(3);
 
-    clusters.emplace_back(0.5, gauss::GaussianDistribution(
-                                   gauss::test::make_vector({0, 0}),
-                                   gauss::make_random_covariance(eigs_cov)));
+    emplace_back(clusters, 0.5, gauss::test::make_vector({0, 0}),
+                                   gauss::make_random_covariance(eigs_cov));
 
-    clusters.emplace_back(0.25, gauss::GaussianDistribution(
-                                    gauss::test::make_vector({2, 2}),
-                                    gauss::make_random_covariance(eigs_cov)));
+    emplace_back(clusters, 0.25, gauss::test::make_vector({2, 2}),
+                                    gauss::make_random_covariance(eigs_cov));
 
-    clusters.emplace_back(0.25, gauss::GaussianDistribution(
-                                    gauss::test::make_vector({-2, -2}),
-                                    gauss::make_random_covariance(eigs_cov)));
+    emplace_back(clusters, 0.25, gauss::test::make_vector({-2, -2}),
+                                    gauss::make_random_covariance(eigs_cov));
   }
 
   auto samples =
@@ -107,14 +110,11 @@ TEST(Sampling, 6d) {
     eigs_cov << 0.1, 0.2, 0.1, 0.2, 0.1, 0.2;
     clusters.reserve(2);
 
-    clusters.emplace_back(0.5, gauss::GaussianDistribution(
-                                   gauss::test::make_vector({3, 3, 3, 3, 3, 3}),
-                                   gauss::make_random_covariance(eigs_cov)));
+    emplace_back(clusters, 0.5, gauss::test::make_vector({3, 3, 3, 3, 3, 3}),
+                                   gauss::make_random_covariance(eigs_cov));
 
-    clusters.emplace_back(
-        0.5, gauss::GaussianDistribution(
-                 gauss::test::make_vector({-3, -3, -3, -3, -3, -3}),
-                 gauss::make_random_covariance(eigs_cov)));
+    emplace_back(clusters, 0.5, gauss::test::make_vector({-3, -3, -3, -3, -3, -3}),
+                                    gauss::make_random_covariance(eigs_cov));
   }
 
   gauss::gmm::GaussianMixtureModel ref_model(clusters);
@@ -139,11 +139,10 @@ TEST(Sampling, 2d) {
     double angle = 0.0;
     double angle_delta = gauss::PI_GREEK / static_cast<double>(nClusters);
     for (std::size_t c = 0; c < nClusters; ++c) {
-      clusters.emplace_back(
+      emplace_back(clusters,
           1.0 / static_cast<double>(nClusters),
-          gauss::GaussianDistribution(
               gauss::test::make_vector({2.0 * cos(angle), 2.0 * sin(angle)}),
-              gauss::make_random_covariance(eigs_cov)));
+              gauss::make_random_covariance(eigs_cov));
       angle += angle_delta;
     }
   }

@@ -36,7 +36,9 @@ namespace gauss::gmm {
             weights *= 1.0 / sum;
         }
         for (std::size_t c = 0; c < clusters; ++c) {
-            clusters_data.emplace_back(weights(c), *cluster_factory.makeRandomModel());
+            clusters_data.emplace_back();
+            clusters_data.back().weight = weights(c);
+            clusters_data.back().distribution = cluster_factory.makeRandomModel();
         }
         return std::make_unique<GaussianMixtureModel>(clusters_data);
     }

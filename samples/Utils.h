@@ -27,8 +27,8 @@ std::string toJSON(const gauss::gmm::Cluster &cl) {
   std::stringstream str;
   str << std::endl << '{';
   str << std::endl << "\"w\":" << cl.weight;
-  str << std::endl << ",\"Mean\":" << toJSON(cl.distribution.getMean());
-  auto covariance = cl.distribution.getCovariance();
+  str << std::endl << ",\"Mean\":" << toJSON(cl.distribution->getMean());
+  auto covariance = cl.distribution->getCovariance();
   str << std::endl << ",\"Covariance\":[";
   str << std::endl << toJSON(covariance.row(0));
   for (Eigen::Index k = 1; k < covariance.rows(); ++k) {
