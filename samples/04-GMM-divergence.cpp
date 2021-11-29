@@ -77,14 +77,16 @@ std::unique_ptr<gauss::gmm::GaussianMixtureModel> getSimilarModel(const gauss::g
 	new_clusters.reserve(old_clusters.size());
 	for (const auto& old_cluster : old_clusters) {
 		double new_weight = old_cluster.weight + 0.02 * static_cast<double>(rand()) / static_cast<double>(RAND_MAX);
-		auto new_mean = old_cluster.distribution.getMean();
+		auto new_mean = old_cluster.distribution->getMean();
 		{
 			Eigen::VectorXd delta(new_mean.size());
 			delta.setRandom();
 			delta *= 0.1;
 			new_mean += delta;
 		}
-		new_clusters.emplace_back(new_weight, gauss::GaussianDistribution(new_mean, old_cluster.distribution.getCovariance()));
+		new_clusters.emplace_back();
+		new_clusters.back().weight = new_weight;
+		new_clusters.back().distribution = std::make_unique<gauss::GaussianDistribution>(new_mean, old_cluster.distribution->getCovariance());
 	}
 	return std::make_unique<gauss::gmm::GaussianMixtureModel>(new_clusters);
 }
