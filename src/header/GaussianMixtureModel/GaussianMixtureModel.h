@@ -11,12 +11,8 @@
 
 namespace gauss::gmm {
 	struct Cluster {
-		Cluster(const double w, const GaussianDistribution& distribution) 
-			: weight(w)
-			, distribution(distribution) {};
-
 		double weight;
-		GaussianDistribution distribution;
+		std::unique_ptr<GaussianDistribution> distribution;
 	};
 
 	class GaussianMixtureModel : public DivergenceAware<GaussianMixtureModel>,
@@ -27,13 +23,22 @@ namespace gauss::gmm {
 		// weights are interally normalized
 		GaussianMixtureModel(const std::vector<Cluster>& clusters);
 
-		GaussianMixtureModel(const GaussianMixtureModel& o) = default;
-		GaussianMixtureModel& operator=(const GaussianMixtureModel& o) = default;
+		GaussianMixtureModel(const double weight, const gauss::GaussianDistribution& distribution);
+
+		GaussianMixtureModel(const GaussianMixtureModel& o);
+		GaussianMixtureModel& operator=(const GaussianMixtureModel& o);
 
 		GaussianMixtureModel(GaussianMixtureModel&& o) = default;
 		GaussianMixtureModel& operator=(GaussianMixtureModel&& o) = default;
 
-		std::size_t getStateSpaceSize() const override { return clusters.front().distribution.getStateSpaceSize(); }
+		std::size_t getStateSpaceSize() const override { return clusters.front().distribution->getStateSpaceSize(); }
+
+		/** 
+		 * @param[in] the weight of the cluster to add (is internally re-scaled)
+		 * @param[in] the distribution of the cluster to add
+		 * @throw in case the weight is negative
+		 */
+		void addCluster(const double weight, const gauss::GaussianDistribution& distribution);
 
 		/** @brief Use this method to fit a GMM with an unknown number of clusters.
 		 * Training is done for every possible number of clusters in N_clusters_to_try and the solution maximising the likelyhood of the training set is selected.
@@ -65,7 +70,6 @@ namespace gauss::gmm {
 		 * @param[in] other the model for which the divergence w.r.t. this one must be estimated
 		 * @param[out] the divergence
 		 */
-		 // Monte Carlo
 		double evaluateKullbackLeiblerDivergence(
 			const GaussianMixtureModel& other) const override;
 
@@ -84,6 +88,7 @@ namespace gauss::gmm {
 
 	private:
 		std::size_t monte_carlo_trials = 500;
-		const std::vector<Cluster> clusters;
+		std::vector<double> original_clusters_weights; // before re-scaling
+		std::vector<Cluster> clusters;
 	};
 }
