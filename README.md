@@ -1,3 +1,6 @@
+![binaries_compilation](https://github.com/andreacasalino/Gaussian-Mixture-Model/actions/workflows/installArtifacts.yml/badge.svg)
+![binaries_compilation](https://github.com/andreacasalino/Gaussian-Mixture-Model/actions/workflows/runTests.yml/badge.svg)
+
 This libary contains the functionalities required to train and handle **Gaussian Mixture Models**, aka **GMM**.
 If you believe to be not really familiar with this object, have a look at ./doc/Gaussian_Mixture_Model.pdf.
 
