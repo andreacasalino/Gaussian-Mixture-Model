@@ -29,4 +29,4 @@ MakeTest(Test01-DistributionCreation)
 
 MakeTest(Test02-kMeans)
 
-MakeTest(Test03-Sampling)
+MakeTest(Test03-EMAndSampling)
