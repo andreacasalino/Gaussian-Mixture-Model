@@ -20,7 +20,7 @@ set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 project(Gaussian-Mixture-Model)
 add_subdirectory(src)
 
-option(BUILD_GaussianMixtureModels_SAMPLES "Build the samples showing how to use the package" OFF)
+option(BUILD_GaussianMixtureModels_SAMPLES "Build the samples showing how to use the package" ON)
 if(BUILD_GaussianMixtureModels_SAMPLES)
 	project(GaussianMixtureModels-Samples)
     add_subdirectory(samples)
