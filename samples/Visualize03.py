@@ -64,8 +64,8 @@ def plot_GMM(file, ax, color):
 fig = plt.figure(figsize=plt.figaspect(0.5))
 
 ax1 = fig.add_subplot(1, 2, 1, projection='3d')
-lim = plot_GMM('random_model3d.json',ax1,[0,1,0])
-ax1.set_ylabel('real model covariances (trasparency proportional weigth)')
+lim = plot_GMM('reference_model3d.json',ax1,[0,1,0])
+ax1.set_ylabel('reference model covariances (trasparency proportional weigth)')
 
 ax2 = fig.add_subplot(1, 2, 2, projection='3d')
 lim = plot_GMM('learnt_model3d.json',ax2,[0,0,1])

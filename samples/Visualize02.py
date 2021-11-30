@@ -56,8 +56,8 @@ def plot_GMM(file, ax, color):
     
 fig, (ax1, ax2) = plt.subplots(1, 2)
 
-plot_GMM('random_model2d.json',ax1,[0,1,0])
-ax1.set_ylabel('real model covariances (trasparency proportional weigth)')
+plot_GMM('reference_model2d.json',ax1,[0,1,0])
+ax1.set_ylabel('reference model covariances (trasparency proportional weigth)')
 
 plot_GMM('learnt_model2d.json',ax2,[0,0,1])
 ax2.set_ylabel('learnt model covariances (trasparency proportional to weigth)')
