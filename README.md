@@ -14,3 +14,5 @@ This package is completely **cross-platform**: use [CMake](https://cmake.org) to
 This library uses [**Eigen**](https://gitlab.com/libeigen/eigen) as internal linear algebra engine. 
 **Eigen** is by default [fetched](https://cmake.org/cmake/help/latest/module/FetchContent.html) and copied by **CMake** from the latest version on the official **Eigen** repository.
 However, you can also use a local version, by [setting](https://www.youtube.com/watch?v=LxHV-KNEG3k&t=1s) the **CMake** option **EIGEN_INSTALL_FOLDER** equal to the root folder storing the local **Eigen** you want to use.
+
+If you have found this library useful, take the time to leave a star ;)
