@@ -98,7 +98,8 @@ int main() {
   print(reference_model, "reference_model3d.json");
   print(learnt_model, "learnt_model3d.json");
 
-  // use the python script Visualize03.py to see the results
+  std::cout << "Use the python script Visualize03.py to see the results"
+            << std::endl;
 
   return EXIT_SUCCESS;
 }
