@@ -2,7 +2,7 @@ include(FetchContent)
 FetchContent_Declare(
   guass_utils
   GIT_REPOSITORY https://github.com/andreacasalino/Gaussian-Utils.git
-  GIT_TAG        a02de2ea9d97d82ec32d5038eea64c6b90f5a004
+  GIT_TAG        58b3f207cf6df73a0b7cdc8bde933b06d20ab502
 )
 FetchContent_MakeAvailable(guass_utils)
 
